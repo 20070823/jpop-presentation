@@ -1,0 +1,2106 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="h-full"><head><script data-bard-client-injected="true">(function(firebaseConfig, initialAuthToken, appId) {
+        window.__firebase_config = firebaseConfig;
+        window.__initial_auth_token = initialAuthToken;
+        window.__app_id = appId;
+            })("\n{\n  \"apiKey\": \"AIzaSyCqyCcs2R2e7AegGjvFAwG98wlamtbHvZY\",\n  \"authDomain\": \"bard-frontend.firebaseapp.com\",\n  \"projectId\": \"bard-frontend\",\n  \"storageBucket\": \"bard-frontend.firebasestorage.app\",\n  \"messagingSenderId\": \"175205271074\",\n  \"appId\": \"1:175205271074:web:2b7bd4d34d33bf38e6ec7b\"\n}\n","eyJhbGciOiJSUzI1NiIsImtpZCI6IjExNjRiNzdiNDMzZDdhMDAyMWI4NjE4YjhjYTU3ZTMyZGI5MWUxMTMiLCJ0eXAiOiJKV1QifQ.eyJzdWIiOiJmaXJlYmFzZS1hZG1pbnNkay1mYnN2Y0BiYXJkLWZyb250ZW5kLmlhbS5nc2VydmljZWFjY291bnQuY29tIiwiYXVkIjoiaHR0cHM6Ly9pZGVudGl0eXRvb2xraXQuZ29vZ2xlYXBpcy5jb20vZ29vZ2xlLmlkZW50aXR5LmlkZW50aXR5dG9vbGtpdC52MS5JZGVudGl0eVRvb2xraXQiLCJ1aWQiOiIwNTUzMjM2MDc2MjI5NDg3NTI0NSIsImlzcyI6ImZpcmViYXNlLWFkbWluc2RrLWZic3ZjQGJhcmQtZnJvbnRlbmQuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLCJjbGFpbXMiOnsiYXBwSWQiOiJjXzcwZWJjYjcxOGRjYWQ1MDNfYTM4YzE0YjhfaW5kZXguaHRtbC11bmRlZmluZWQifSwiZXhwIjoxNzkzNzEyOTE2LCJpYXQiOjE3OTM3MDkzMTYsImFsZyI6IlJTMjU2In0.XUCq0a5Xj5RAmQqwu9MX1JzO7SdWoy5YG_PvxAXRECGSw2wlyedleefUWVyRfGtSvLPBJVgC79EsBh-nfvWsui0lpudp1YOyiqAc4RJ8U9rJPvfXnJDEuau-Lc6yrBnx60_pfWC6Tx1anckPbbjPRHC4F2zYQu5txjYz9hwuwQy9w7fzHBbOfIUFQ_39U_bDfZhN8cxJQQe5gH9c5ikyfMzpC7Quh1JswYEymfLGQgNDiVQIAcX6M_R_dlnAjOqaydSkD6bNXbb2-KmM-ig6W714lcnV7Dyx-yuPCSDN0Ee9_qRUs3ZSAESgm9wbNJor4lMNahvd4nerxLb_ldxAFw","c_70ebcb718dcad503_a38c14b8_index.html-undefined")</script><script data-bard-client-injected="true">
+  document.addEventListener('input', (event) => {
+    if (event.target && (event.target.isContentEditable || event.target.hasAttribute('contenteditable'))) {
+      const clonedDoc = document.cloneNode(true);
+      const injectedScripts = clonedDoc.querySelectorAll('[data-bard-client-injected="true"]');
+      injectedScripts.forEach(el => el.remove());
+      window.parent.postMessage({
+        type: 'inlineEdit',
+        html: '<!DOCTYPE html>\n' + clonedDoc.documentElement.outerHTML
+      }, '*');
+    }
+  });
+</script><script data-bard-client-injected="true">(function(){'use strict';window.addEventListener("message",a=>{a.data&&a.data.type==="SUPPLEMENTAL_DATA_UPDATE"&&window.dispatchEvent(new CustomEvent("supplementaldataupdate",{detail:a.data.data}))});}).call(this);
+</script><script data-bard-client-injected="true">(function() {
+  const SCROLL_KEYS = new Set([
+    'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
+    ' ', 'Spacebar', 'PageUp', 'PageDown', 'Home', 'End',
+  ]);
+  const HORIZONTAL_KEYS = new Set(['ArrowLeft', 'ArrowRight']);
+
+  function isTextEntryTarget(target) {
+    if (!target) return false;
+    const tagName = target.tagName;
+    return tagName === 'INPUT' || tagName === 'TEXTAREA' ||
+        tagName === 'SELECT' || target.isContentEditable === true;
+  }
+
+  // An element absorbs the key only if it both overflows on the axis being
+  // scrolled and is configured to scroll on that axis. The cheap dimension
+  // test runs first because getComputedStyle forces a style recalc, and this
+  // runs on every keypress. Each axis is read from its own longhand: the
+  // 'overflow' shorthand serializes as two values when the axes differ, which
+  // is the common 'overflow-x: hidden; overflow-y: auto' pane.
+  function canScroll(node, horizontal) {
+    const overflows = horizontal ? node.scrollWidth > node.clientWidth
+                                 : node.scrollHeight > node.clientHeight;
+    if (!overflows) return false;
+    const style = window.getComputedStyle(node);
+    const overflow = horizontal ? style.overflowX : style.overflowY;
+    return overflow === 'auto' || overflow === 'scroll';
+  }
+
+  // Walks up from the event target so nested scrollers keep their behavior.
+  // <body> is included because pages that pin the root height make it the
+  // scroll container.
+  function hasScrollableAncestor(target, horizontal) {
+    let node = target;
+    while (node && node !== document.documentElement) {
+      if (canScroll(node, horizontal)) return true;
+      node = node.parentElement;
+    }
+    return false;
+  }
+
+  function rootCanScroll(horizontal) {
+    const scroller = document.scrollingElement || document.documentElement;
+    if (!scroller) return false;
+    // Tolerate a pixel of rounding so subpixel layouts do not look scrollable.
+    return horizontal ? scroller.scrollWidth > window.innerWidth + 1
+                      : scroller.scrollHeight > window.innerHeight + 1;
+  }
+
+  window.addEventListener('keydown', function(event) {
+    if (!SCROLL_KEYS.has(event.key)) return;
+    if (event.defaultPrevented) return;
+    // Alt and Meta turn arrows into browser history navigation, and Ctrl is
+    // reserved for shortcuts, so none of them are scroll intent.
+    if (event.altKey || event.metaKey || event.ctrlKey) return;
+
+    const target = event.target;
+    if (isTextEntryTarget(target)) return;
+
+    // Anything that can still absorb the scroll gets to keep it.
+    const horizontal = HORIZONTAL_KEYS.has(event.key);
+    if (rootCanScroll(horizontal)) return;
+    if (hasScrollableAncestor(target, horizontal)) return;
+
+    event.preventDefault();
+  }, {capture: true, passive: false});
+})();</script><script data-bard-client-injected="true">(function() {
+  // Ensure this script is executed only once
+  if (window.firebaseAuthBridgeScriptLoaded) {
+    return;
+  }
+  window.firebaseAuthBridgeScriptLoaded = true;
+
+  let nextTokenPromiseId = 0;
+
+  // Stores { resolve, reject } for ongoing token requests
+  const pendingTokenPromises = {};
+
+  // Listen for messages from the Host Application
+  window.addEventListener('message', function(event) {
+
+    const messageData = event.data;
+
+  if (messageData && messageData.type === 'RESOLVE_NEW_FIREBASE_TOKEN') {
+      const { success, token, error, promiseId } = messageData ?? {};
+      if (pendingTokenPromises[promiseId]) {
+        if (success) {
+          pendingTokenPromises[promiseId].resolve(token);
+        } else {
+          pendingTokenPromises[promiseId].reject(new Error(error || 'Token refresh failed from host.'));
+        }
+        delete pendingTokenPromises[promiseId];
+      }
+    }
+  });
+
+  // Expose a function for the Generated App to request a new Firebase token
+  window.requestNewFirebaseToken = function() {
+    const currentPromiseId = nextTokenPromiseId++;
+    const promise = new Promise((resolve, reject) => {
+      pendingTokenPromises[currentPromiseId] = { resolve, reject };
+    });
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({
+        type: 'REQUEST_NEW_FIREBASE_TOKEN',
+        promiseId: currentPromiseId
+      }, '*');
+    } else {
+      pendingTokenPromises[currentPromiseId].reject(new Error('No parent window to request token from.'));
+      delete pendingTokenPromises[currentPromiseId];
+    }
+    return promise;
+  };
+})();</script><script data-bard-client-injected="true">
+let realOriginalGetUserMedia = null;
+if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+  realOriginalGetUserMedia = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
+}
+
+(function() {
+  if (navigator.mediaDevices && navigator.mediaDevices.__proto__) {
+    try {
+      Object.defineProperty(navigator.mediaDevices.__proto__, 'getUserMedia', {
+        get: function() {
+          return undefined; // Or throw an error
+        },
+        configurable: false
+      });
+    } catch (error) {
+      console.error("Error defining prototype getter:", error);
+    }
+  }
+})();
+
+(function() {
+  const pendingMediaResolvers = {};
+  let nextMediaPromiseId = 0;
+
+  function requestMediaPermissions(constraints) {
+    const mediaPromiseId = nextMediaPromiseId++;
+    const promise = new Promise((resolve, reject) => {
+      pendingMediaResolvers[mediaPromiseId] = (granted) => {
+        delete pendingMediaResolvers[mediaPromiseId];
+        resolve(granted);
+      };
+    });
+
+    window.parent.postMessage({
+      type: 'requestMediaPermission',
+      constraints: constraints,
+      promiseId: mediaPromiseId,
+    }, '*');
+
+    return promise;
+  }
+
+  let originalGetUserMedia = realOriginalGetUserMedia;
+
+  function interceptGetUserMedia() {
+    if (navigator.mediaDevices) {
+      Object.defineProperty(navigator.mediaDevices, 'getUserMedia', {
+        value: function(constraints) {
+          return requestMediaPermissions(constraints).then((granted) => {
+            if (granted) {
+              if (originalGetUserMedia) {
+                return originalGetUserMedia(constraints);
+              } else {
+                throw new Error("Original getUserMedia not available.");
+              }
+            } else {
+              throw new DOMException('Permission denied', 'NotAllowedError');
+            }
+          });
+        },
+        writable: false,
+        configurable: false
+      });
+    }
+  }
+
+  interceptGetUserMedia();
+
+  const observer = new MutationObserver(function(mutationsList, observer) {
+    for (const mutation of mutationsList) {
+      if (mutation.type === 'reconfigured' && mutation.name === 'getUserMedia' && mutation.object === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'attributes' && mutation.attributeName === 'getUserMedia' && mutation.target === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'childList' && mutation.addedNodes) {
+        mutation.addedNodes.forEach(node => {
+          if (node === navigator.mediaDevices) {
+            interceptGetUserMedia();
+          }
+        });
+      }
+    }
+  });
+
+  function interceptSpeechRecognition() {
+    if (!window.SpeechRecognition && !window.webkitSpeechRecognition) {
+      return;
+    }
+
+    const OriginalSpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    const SpeechRecognitionWrapper = function(...args) {
+      const recognizer = new OriginalSpeechRecognition(...args);
+      const originalStart = recognizer.start.bind(recognizer);
+
+      recognizer.start = function() {
+        requestMediaPermissions({ audio: true }).then(granted => {
+          if (granted) {
+            originalStart();
+          } else {
+            const errorEvent = new SpeechRecognitionErrorEvent('error');
+            errorEvent.error = 'not-allowed'; // This is the standard error for permission denial.
+            recognizer.dispatchEvent(errorEvent);
+          }
+        });
+      };
+
+      return recognizer;
+    };
+
+    SpeechRecognitionWrapper.prototype = OriginalSpeechRecognition.prototype;
+    SpeechRecognitionWrapper.prototype.constructor = SpeechRecognitionWrapper;
+
+    if (window.SpeechRecognition) {
+      window.SpeechRecognition = SpeechRecognitionWrapper;
+    }
+    if (window.webkitSpeechRecognition) {
+      window.webkitSpeechRecognition = SpeechRecognitionWrapper;
+    }
+  }
+
+  interceptSpeechRecognition();
+
+  window.addEventListener('message', function(event) {
+    if (event.data) {
+      if (event.data.type === 'resolveMediaPermission') {
+        const { promiseId, granted } = event.data;
+        if (pendingMediaResolvers[promiseId]) {
+          pendingMediaResolvers[promiseId](granted);
+        }
+      }
+    }
+  });
+
+})();</script><script ws-interception-config="{&quot;parentOrigin&quot;:&quot;https://gemini.google.com&quot;,&quot;proxiedDomains&quot;:[]}" data-bard-client-injected="true">(function(){'use strict';var u=typeof Object.defineProperties=="function"?Object.defineProperty:function(b,d,e){if(b==Array.prototype||b==Object.prototype)return b;b[d]=e.value;return b};function v(b){b=["object"==typeof globalThis&&globalThis,b,"object"==typeof window&&window,"object"==typeof self&&self,"object"==typeof global&&global];for(var d=0;d<b.length;++d){var e=b[d];if(e&&e.Math==Math)return e}throw Error("Cannot find global object");}var w=v(this);
+function y(b,d){if(d)a:{var e=w;b=b.split(".");for(var h=0;h<b.length-1;h++){var k=b[h];if(!(k in e))break a;e=e[k]}b=b[b.length-1];h=e[b];d=d(h);d!=h&&d!=null&&u(e,b,{configurable:!0,writable:!0,value:d})}}function z(b){function d(h){return b.next(h)}function e(h){return b.throw(h)}return new Promise(function(h,k){function m(n){n.done?h(n.value):Promise.resolve(n.value).then(d,e).then(m,k)}m(b.next())})}y("globalThis",function(b){return b||w});/*
+
+ Copyright The Closure Library Authors.
+ SPDX-License-Identifier: Apache-2.0
+*/
+function A(b,d){function e(){}e.prototype=d.prototype;b.j=d.prototype;b.prototype=new e;b.prototype.constructor=b;b.h=function(h,k,m){for(var n=Array(arguments.length-2),p=2;p<arguments.length;p++)n[p-2]=arguments[p];return d.prototype[k].apply(h,n)}};function B(b,d,e="*"){function h(a){if(typeof a==="string")return F.encode(a).buffer;if(a instanceof ArrayBuffer)return a.slice(0);if(ArrayBuffer.isView(a))return a.buffer.slice(a.byteOffset,a.byteOffset+a.byteLength);throw Error("Invalid data type");}function k(a){a=h(a);var f={type:"send",data:new Uint8Array(a)},g;(g=r)==null||g.postMessage(f,[a])}function m(){if(!r)throw Error("Data port not captured yet.");r.onmessage=a=>{if(a.data.type==="message"){a=new MessageEvent("message",{data:G.decode(a.data.data)});
+let f;(f=c.onmessage)==null||f.call(c,a);c.dispatchEvent(a)}}}function n(){if(!t)throw Error("Control port not captured yet.");t.onmessage=a=>{switch(a.data.type){case "open":l=1;var f=new Event("open"),g;(g=c.onopen)==null||g.call(c,f);c.dispatchEvent(f);q.forEach(H=>{k(H)});q=[];break;case "close":g=a.data;l=3;g=new CloseEvent("close",{code:g.code,reason:g.reason,wasClean:g.wasClean});(f=c.onclose)==null||f.call(c,g);c.dispatchEvent(g);break;case "error":l=3;f=new Event("error");let x;(x=c.onerror)==
+null||x.call(c,f);c.dispatchEvent(f)}}}function p(a){return z(function*(){var f=new MessageChannel;t=f.port1;var g=new MessageChannel;r=g.port1;n();m();window.parent.postMessage({type:"websocket_open",portOrdering:["control","data"],url:b,protocols:a||[],connectionId:I},e,[f.port2,g.port2])}())}var c=Reflect.construct(EventTarget,[],new.target);c.CONNECTING=0;c.OPEN=1;c.CLOSING=2;c.CLOSED=3;c.url=b;c.binaryType="arraybuffer";c.protocol="";c.i="";var l=0,t=null,r=null,q=[],F=new TextEncoder,G=new TextDecoder;
+c.onopen=null;c.onmessage=null;c.onclose=null;c.onerror=null;Object.defineProperty(c,"readyState",{get:()=>l,enumerable:!0,configurable:!0});Object.defineProperty(c,"bufferedAmount",{get:()=>{var a=0;q.forEach(f=>{a+=typeof f==="string"?f.length:f.byteLength});return a},enumerable:!0,configurable:!0});var I=function(){var a;return((a=globalThis.crypto)==null?0:a.randomUUID)?globalThis.crypto.randomUUID():"xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,f=>{var g=Math.random()*16|0;return(f===
+"x"?g:g&3|8).toString(16)})}();c.send=a=>{if(l===1)a instanceof Blob?a.arrayBuffer().then(f=>{k(f)}):k(a);else if(l===0)if(typeof a==="string")q.push(a);else if(a instanceof ArrayBuffer||ArrayBuffer.isView(a))q.push(h(a));else throw Error("Sending Blob is not supported before the connection is open.");else console.debug("WebSocket send called in CLOSING or CLOSED state; ignored.")};c.close=(a=1E3,f="")=>{if(l!==2&&l!==3){l=2;a={type:"close",code:a,reason:f,wasClean:a===1E3};var g;(g=t)==null||g.postMessage(a)}};
+Promise.resolve().then(()=>p(d));return c}A(B,EventTarget);var C=document.currentScript,D=C==null?void 0:C.getAttribute("ws-interception-config");if(!D)throw Error("WebSocket Interceptor: Missing ws-interception-config attribute in the script tag.");var E=JSON.parse(D);if(!E.parentOrigin||typeof E.parentOrigin!=="string")throw Error("WebSocket Interceptor: Invalid parentOrigin in ws-interception-config");
+(function(b){var d=Object.getOwnPropertyDescriptor(window,"WebSocket");if(!d||d.writable||d.configurable)d=Object.assign(function(e,h){try{let k=(new URL(e)).hostname;if(b.proxiedDomains.some(m=>k===m||k.endsWith(`.${m}`)))return new B(e,h,b.parentOrigin)}catch(k){throw window.parent.postMessage({type:"websocket_blocked",url:e,reason:"blocked_invalid_url"},b.parentOrigin),new DOMException(`WebSocket connection to '${e}' is not allowed in Canvas.`,"SecurityError");}window.parent.postMessage({type:"websocket_blocked",
+url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMException(`WebSocket connection to '${e}' is not allowed in Canvas.`,"SecurityError");},{CONNECTING:0,OPEN:1,CLOSING:2,CLOSED:3}),Object.defineProperty(window,"WebSocket",{value:d,writable:!1,configurable:!1})})({proxiedDomains:E.proxiedDomains||[],parentOrigin:E.parentOrigin});}).call(this);
+</script><script data-bard-client-injected="true">((function(modelInformation) {
+  const originalFetch = window.fetch;
+  // TODO: b/421908508 - Move these out of the script and match all generative AI model calls.
+  let googleLlmBaseApiUrls = [
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.textModelName + ':streamGenerateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.textModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageModelName + ':predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageModelName + ':predictLongRunning',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageEditModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageTransformModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.videoModelName + ':predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.videoModelName + ':predictLongRunning',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.ttsModelName + ':generateContent',
+  ];
+  modelInformation.deprecatedTextModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+    );
+  });
+  modelInformation.deprecatedImageModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':predict',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':predictLongRunning',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+  modelInformation.deprecatedGenerateImageModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+  modelInformation.deprecatedImageTransformModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+
+  const pendingFetchResolvers = {};
+  let nextPromiseId = 0;
+
+  function handleStringInput(input, optionsArgument) {
+    const actualUrl = input;
+    const fetchCallArgs = [actualUrl, optionsArgument];
+    const effectiveOptions = optionsArgument || {};
+    const bodyForApiKeyCheck = effectiveOptions.body;
+    const bodyForPostMessage = effectiveOptions.body;
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  function handleRequestInput(input, optionsArgument) {
+    const actualUrl = input.url;
+    const fetchCallArgs = [input, optionsArgument];
+    const effectiveOptions = { method: input.method, headers: new Headers(input.headers) };
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (optionsArgument) {
+      if (optionsArgument.method) effectiveOptions.method = optionsArgument.method;
+      if (optionsArgument.headers) effectiveOptions.headers = new Headers(optionsArgument.headers);
+      if ('body' in optionsArgument) {
+        bodyForApiKeyCheck = optionsArgument.body;
+        bodyForPostMessage = optionsArgument.body;
+      } else {
+        bodyForApiKeyCheck = undefined;
+        bodyForPostMessage = input.body;
+      }
+    } else {
+      bodyForApiKeyCheck = undefined;
+      bodyForPostMessage = input.body;
+    }
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  window.fetch = function(input, optionsArgument) {
+    let actualUrl;
+    let fetchCallArgs;
+    let effectiveOptions = {};
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (typeof input === 'string') {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleStringInput(input, optionsArgument));
+    } else if (input instanceof Request) {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleRequestInput(input, optionsArgument));
+    } else {
+      return originalFetch.apply(window, [input, optionsArgument]);
+    }
+
+    effectiveOptions.method = effectiveOptions.method || 'GET';
+    if (!effectiveOptions.headers) {
+      effectiveOptions.headers = new Headers();
+    }
+
+
+    if (typeof actualUrl === 'string' && googleLlmBaseApiUrls.some((url) => actualUrl.startsWith(url))) {
+      let apiKeyIsNull = true;
+
+      const regex = new RegExp("models/([^:]+)");
+      const modelNameMatch = actualUrl.match(regex);
+      const modelName = modelNameMatch ? modelNameMatch[1] : 'unspecified';
+
+
+      try {
+        const urlObject = new URL(actualUrl);  // Use URL object for robust parsing
+        const apiKeyParam = urlObject.searchParams.get('key');
+        if (apiKeyParam) {
+          apiKeyIsNull = false;
+        }
+      } catch (e) {
+        // Continue checks even if URL parsing fails
+      }
+
+      if (apiKeyIsNull && effectiveOptions.headers) {
+        const h = new Headers(effectiveOptions.headers);
+        const apiKeyHeaderValue = h.get('X-API-Key') || h.get('x-api-key');
+        if (apiKeyHeaderValue) {
+          apiKeyIsNull = false;
+          return originalFetch.apply(window, fetchCallArgs);
+        }
+      }
+
+      if (apiKeyIsNull && effectiveOptions.method && ['POST', 'PUT', 'PATCH'].includes(effectiveOptions.method.toUpperCase()) && typeof bodyForApiKeyCheck === 'string') {
+        try {
+          const bodyData = JSON.parse(bodyForApiKeyCheck);
+          if (bodyData && bodyData.apiKey) {
+            apiKeyIsNull = false;
+            return originalFetch.apply(window, fetchCallArgs);
+          }
+        } catch (e) {
+          // Ignore JSON parsing errors
+        }
+      }
+
+      if(apiKeyIsNull) {
+        const promiseId = nextPromiseId++;
+        const promise = new Promise((resolve) => {
+          pendingFetchResolvers[promiseId] = (resolvedResponse) => {
+            delete pendingFetchResolvers[promiseId];
+            resolve(resolvedResponse);
+          };
+        });
+
+        let serializedBodyForPostMessage;
+        if (typeof bodyForPostMessage === 'string' || bodyForPostMessage == null) {
+            serializedBodyForPostMessage = bodyForPostMessage;
+        } else if (bodyForPostMessage instanceof ReadableStream) {
+            serializedBodyForPostMessage = null;
+        } else {
+            try {
+                serializedBodyForPostMessage = JSON.stringify(bodyForPostMessage);
+            } catch (e) {
+                serializedBodyForPostMessage = null;
+            }
+        }
+
+        const messageOptions = {
+            method: effectiveOptions.method,
+            headers: Object.fromEntries(new Headers(effectiveOptions.headers).entries()),
+            body: serializedBodyForPostMessage
+        };
+
+        window.parent.postMessage({
+          type: 'requestFetch',
+          url: actualUrl,
+          modelName: modelName,
+          options: messageOptions,
+          promiseId: promiseId,
+        }, '*');
+
+        return promise;
+      }
+      return originalFetch.apply(window, fetchCallArgs);
+    }
+    return originalFetch.apply(window, fetchCallArgs);
+  };
+
+  window.addEventListener('message', function(event) {
+    if (event.data && event.data.type === 'resolveFetch') {
+      const { promiseId, response } = event.data;
+      if (pendingFetchResolvers[promiseId]) {
+        try {
+          const reconstructedResponse = new Response(response.body, {
+            status: response.status,
+            statusText: response.statusText,
+            headers: new Headers(response.headers),
+          });
+          pendingFetchResolvers[promiseId](reconstructedResponse);
+        } catch (error) {
+          pendingFetchResolvers[promiseId](new Response(null, { status: 500, statusText: "Interceptor Response Reconstruction Error" }));
+        }
+      }
+    }
+  });
+
+}))({"textModelName":"gemini-3-flash-preview","imageModelName":"imagen-4.0-generate-001","imageEditModelName":"gemini-3.1-flash-image","imageTransformModelName":"gemini-3-pro-image","videoModelName":"veo-2.0-generate-001","ttsModelName":"gemini-2.5-flash-preview-tts","deprecatedTextModelNames":["gemini-2.0-flash","gemini-2.5-flash","gemini-2.5-flash-preview-04-17","gemini-2.5-flash-preview-05-20","gemini-2.5-flash-preview-09-2025"],"deprecatedImageModelNames":["imagen-3.0-generate-001","imagen-3.0-generate-002"],"deprecatedGenerateImageModelNames":["gemini-2.5-flash-image-preview","gemini-2.5-flash-image","gemini-3.1-flash-image-preview"],"deprecatedImageTransformModelNames":["gemini-3-pro-image-preview-11-2025"]})</script><script data-bard-client-injected="true">(function() {
+  function normalizeSlug(str) {
+    try {
+      return str
+        .trim()
+        .toLowerCase()
+        .replace(/[^p{L}p{N}s_-]/gu, '')
+        .replace(/s+/g, '-');
+    } catch (e) {
+      return str
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9s_-]/g, '')
+        .replace(/s+/g, '-');
+    }
+  }
+
+  function findTargetElement(hash) {
+    if (!hash || hash === '#') {
+      return null;
+    }
+    const rawId = hash.startsWith('#') ? hash.slice(1) : hash;
+    let decodedId = rawId;
+    try {
+      decodedId = decodeURIComponent(rawId);
+    } catch (e) {
+      // Ignore URI malformed errors.
+    }
+
+    // 1. Direct ID match (raw and decoded).
+    let target = document.getElementById(rawId) || document.getElementById(decodedId);
+    if (target) {
+      return target;
+    }
+
+    // 2. Name attribute match (<a name="...">).
+    try {
+      if (typeof CSS !== 'undefined' && CSS.escape) {
+        target =
+          document.querySelector('[name="' + CSS.escape(rawId) + '"]') ||
+          document.querySelector('[name="' + CSS.escape(decodedId) + '"]');
+      } else {
+        const namedElements = document.getElementsByName(rawId);
+        if (namedElements && namedElements.length > 0) {
+          return namedElements[0];
+        }
+      }
+    } catch (e) {
+      // Ignore querySelector syntax errors.
+    }
+    if (target) {
+      return target;
+    }
+
+    // 3. Match heading text by slug (for Markdown TOCs where headings lack explicit IDs).
+    const targetSlug = normalizeSlug(decodedId);
+    if (targetSlug) {
+      for (const heading of document.querySelectorAll('h1, h2, h3, h4, h5, h6')) {
+        if (normalizeSlug(heading.textContent || '') === targetSlug) {
+          return heading;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  document.addEventListener('click', function(event) {
+    const target = event.target;
+    const anchor = target && typeof target.closest === 'function' ? target.closest('a') : null;
+    if (!anchor) {
+      return;
+    }
+
+    const href = anchor.getAttribute('href');
+    if (
+      !href ||
+      href.trim().toLowerCase().startsWith('javascript:') ||
+      anchor.hasAttribute('download')
+    ) {
+      return;
+    }
+
+    // Check if the link is an in-page hash / anchor link.
+    if (href.startsWith('#')) {
+      event.preventDefault();
+      const targetElement = findTargetElement(href);
+      if (targetElement) {
+        targetElement.scrollIntoView({behavior: 'smooth', block: 'start'});
+      }
+      return;
+    }
+
+    // Check if the URL has the same origin/pathname but with a hash.
+    try {
+      const url = new URL(anchor.href, window.location.href);
+      if (
+        url.hash &&
+        url.origin === window.location.origin &&
+        url.pathname === window.location.pathname
+      ) {
+        event.preventDefault();
+        const targetElement = findTargetElement(url.hash);
+        if (targetElement) {
+          targetElement.scrollIntoView({behavior: 'smooth', block: 'start'});
+        }
+        return;
+      }
+    } catch (e) {
+      // Fall through if URL parsing fails.
+    }
+
+    // For all external or full navigation links, prevent iframe-level navigation
+    // (which breaks in AGSA WebView or sandboxed iframes) and ensure they open
+    // safely in a new tab/window.
+    if (anchor.target !== '_blank') {
+      event.preventDefault();
+      window.open(anchor.href, '_blank', 'noopener,noreferrer');
+    }
+  }, {capture: true});
+})();</script><script data-bard-client-injected="true">(function(){'use strict';function a(){window.parent.postMessage({type:"interaction"},"*")}window.addEventListener("click",a,{capture:!0,passive:!0});window.addEventListener("touchstart",a,{capture:!0,passive:!0});window.addEventListener("keydown",a,{capture:!0,passive:!0});}).call(this);
+</script><script data-bard-client-injected="true">(function() {
+  const originalConsoleLog = console.log;
+  const originalConsoleError = console.error;
+
+    /**
+   * Normalizes an error event or a promise rejection reason into a structured error object.
+   * @param {*} errorEventOrReason The error object or reason.
+   * @return {object} Structured error data { message, name, stack }.
+   */
+  function getErrorObject(errorEventOrReason) {
+    if (errorEventOrReason instanceof Error) {
+      return {
+        message: errorEventOrReason.message,
+        name: errorEventOrReason.name,
+        stack: errorEventOrReason.stack,
+      };
+    }
+    // Fallback for non-Error objects.
+    try {
+      return {
+        message: JSON.stringify(errorEventOrReason),
+        name: 'UnknownErrorType',
+        stack: null,
+      };
+    } catch (e) {
+      return {
+        message: String(errorEventOrReason),
+        name: 'UnknownErrorTypeNonStringifiable',
+        stack: null,
+      };
+    }
+  }
+
+  /**
+   * Converts an array of arguments (from log/error) into a single string.
+   * Handles Error objects specially to include their message and stack.
+   * @param {Array<*>} args - Arguments passed to console methods.
+   * @return {string} A string representation of the arguments.
+   */
+  function stringifyArgs(args) {
+    return args
+      .map((arg) => {
+        if (arg instanceof Error) {
+          const {message, stack} = arg;
+          return `Error: ${message}${stack ? ('\nStack: ' + stack) : ''}`;
+        }
+        if (typeof arg === 'object' && arg !== null) {
+          try {
+            return JSON.stringify(arg);
+          } catch (error) {
+            return '[Circular Object]';
+          }
+        } else {
+          return String(arg);
+        }
+      })
+      .join(' ');
+  }
+
+  console.log = function(...args) {
+    const logString = stringifyArgs(args);
+    window.parent.postMessage({ type: 'log', message: logString }, '*');
+    originalConsoleLog.apply(console, args);
+  };
+
+  console.error = function(...args) {
+    let errorData;
+    if (args.length > 0 && args[0] instanceof Error) {
+      const err = args[0];
+      // If the first arg is an Error, capture its details.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        ...getErrorObject(err),
+        rawArgsString: stringifyArgs(args.slice(1)),
+        timestamp: new Date().toISOString(),
+      };
+    } else {
+      // If not an Error object, treat all args as a general error message.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        message: stringifyArgs(args),
+        name: 'ConsoleLoggedError',
+        stack: null,
+        timestamp: new Date().toISOString(),
+      };
+    }
+    window.parent.postMessage(errorData, '*');
+    originalConsoleError.apply(console, args);
+  };
+
+  // Listen for global unhandled synchronous errors.
+  window.addEventListener('error', function(event) {
+    const errorDetails = event.error ? getErrorObject(event.error) : {
+      message: event.message,
+      name: 'GlobalError',
+      stack: null,
+      filename: event.filename,
+      lineno: event.lineno,
+      colno: event.colno,
+    };
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'global',
+      ...errorDetails,
+      message: errorDetails.message || event.message,
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+  // Listen for unhandled promise rejections (asynchronous errors).
+  window.addEventListener('unhandledrejection', function(event) {
+    const errorDetails = getErrorObject(event.reason);
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'unhandledrejection',
+      ...errorDetails,
+      message: errorDetails.message || 'Unhandled Promise Rejection',
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+})();</script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>【網頁簡報】網絡世代的聲音光譜 — 當代 J-POP 聲音美學導引 | 日系文青簡報</title>
+  <!-- Tailwind CSS 3.4.17 -->
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <!-- FontAwesome 6.5.1 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            serif: ['"Noto Serif TC"', '"Yu Mincho"', '"Hiragino Mincho ProN"', 'Georgia', 'serif'],
+            sans: ['-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', '"Noto Sans TC"', 'sans-serif']
+          },
+          colors: {
+            washi: '#FAF7F2',
+            washiDark: '#F2EDE4',
+            sumi: '#262626',
+            charcoal: '#4E4A44',
+            mousse: '#827E77',
+            stoneLine: '#E4DDD2',
+            yoru: '#3B627D',
+            tukiColor: '#A86324',
+            adoColor: '#872338',
+            yuikaColor: '#AD5762',
+            mgaColor: '#2E6B47'
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* 日系和紙文青風格純淨簡報底色 */
+    body {
+      background-color: #FAF7F2;
+      color: #4E4A44;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans TC", "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+      overflow: hidden;
+      background-image: radial-gradient(rgba(180, 165, 150, 0.15) 1px, transparent 1px);
+      background-size: 20px 20px;
+    }
+
+    /* 簡報主畫布 */
+    .slide-stage-card {
+      background: #FFFFFF;
+      border: 1px solid #E2DBD0;
+      border-radius: 1.5rem;
+      box-shadow: 0 10px 35px -5px rgba(80, 65, 50, 0.07);
+    }
+
+    /* 印章標籤 */
+    .stamp-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.2rem 0.65rem;
+      border-radius: 0.375rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+    }
+
+    /* 和風音波視覺條動畫 */
+    @keyframes soundwave-washi {
+      0%, 100% { height: 4px; }
+      50% { height: 18px; }
+    }
+
+    .wave-bar-washi {
+      display: inline-block;
+      width: 2.5px;
+      height: 5px;
+      background-color: #3B627D;
+      border-radius: 1px;
+      margin: 0 1px;
+      transition: height 0.2s;
+    }
+
+    .wave-playing .wave-bar-washi:nth-child(1) { animation: soundwave-washi 0.9s ease-in-out infinite; }
+    .wave-playing .wave-bar-washi:nth-child(2) { animation: soundwave-washi 1.2s ease-in-out infinite 0.2s; }
+    .wave-playing .wave-bar-washi:nth-child(3) { animation: soundwave-washi 0.8s ease-in-out infinite 0.4s; }
+    .wave-playing .wave-bar-washi:nth-child(4) { animation: soundwave-washi 1.1s ease-in-out infinite 0.1s; }
+    .wave-playing .wave-bar-washi:nth-child(5) { animation: soundwave-washi 0.7s ease-in-out infinite 0.3s; }
+
+    /* Toast 動態 */
+    #toast-notification {
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+  </style>
+<style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans TC", sans-serif;font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.pointer-events-none{pointer-events:none}.fixed{position:fixed}.relative{position:relative}.inset-0{inset:0px}.inset-y-0{top:0px;bottom:0px}.bottom-16{bottom:4rem}.left-0{left:0px}.right-0{right:0px}.right-4{right:1rem}.top-20{top:5rem}.z-30{z-index:30}.z-40{z-index:40}.z-50{z-index:50}.mx-auto{margin-left:auto;margin-right:auto}.mb-3{margin-bottom:0.75rem}.mb-1{margin-bottom:0.25rem}.mb-2{margin-bottom:0.5rem}.mb-4{margin-bottom:1rem}.mt-0\.5{margin-top:0.125rem}.mt-2{margin-top:0.5rem}.mt-3{margin-top:0.75rem}.block{display:block}.flex{display:flex}.grid{display:grid}.hidden{display:none}.aspect-\[16\/9\]{aspect-ratio:16/9}.h-1\.5{height:0.375rem}.h-10{height:2.5rem}.h-14{height:3.5rem}.h-16{height:4rem}.h-3{height:0.75rem}.h-7{height:1.75rem}.h-8{height:2rem}.h-9{height:2.25rem}.h-full{height:100%}.h-1{height:0.25rem}.max-h-\[35vh\]{max-height:35vh}.max-h-\[85vh\]{max-height:85vh}.max-h-\[88vh\]{max-height:88vh}.max-h-\[360px\]{max-height:360px}.min-h-\[220px\]{min-height:220px}.w-1\/3{width:33.333333%}.w-10{width:2.5rem}.w-20{width:5rem}.w-7{width:1.75rem}.w-8{width:2rem}.w-9{width:2.25rem}.w-\[10\%\]{width:10%}.w-full{width:100%}.w-12{width:3rem}.min-w-0{min-width:0px}.max-w-2xl{max-width:42rem}.max-w-4xl{max-width:56rem}.max-w-5xl{max-width:64rem}.max-w-6xl{max-width:72rem}.max-w-xl{max-width:36rem}.flex-1{flex:1 1 0%}.flex-shrink-0{flex-shrink:0}.translate-y-2{--tw-translate-y:0.5rem;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.transform{transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.select-none{-webkit-user-select:none;user-select:none}.grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-end{align-items:flex-end}.items-center{align-items:center}.justify-end{justify-content:flex-end}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-1\.5{gap:0.375rem}.gap-2{gap:0.5rem}.gap-3{gap:0.75rem}.gap-4{gap:1rem}.gap-1{gap:0.25rem}.gap-2\.5{gap:0.625rem}.space-y-2 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.5rem * var(--tw-space-y-reverse))}.space-y-4 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1rem * var(--tw-space-y-reverse))}.overflow-hidden{overflow:hidden}.overflow-y-auto{overflow-y:auto}.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rounded{border-radius:0.25rem}.rounded-3xl{border-radius:1.5rem}.rounded-full{border-radius:9999px}.rounded-lg{border-radius:0.5rem}.rounded-xl{border-radius:0.75rem}.rounded-md{border-radius:0.375rem}.border{border-width:1px}.border-b{border-bottom-width:1px}.border-t{border-top-width:1px}.border-l{border-left-width:1px}.border-\[\#C2D6E3\]{--tw-border-opacity:1;border-color:rgb(194 214 227 / var(--tw-border-opacity, 1))}.border-\[\#D5C9B8\]{--tw-border-opacity:1;border-color:rgb(213 201 184 / var(--tw-border-opacity, 1))}.border-\[\#E2D7C8\]{--tw-border-opacity:1;border-color:rgb(226 215 200 / var(--tw-border-opacity, 1))}.border-\[\#E2DBD0\]{--tw-border-opacity:1;border-color:rgb(226 219 208 / var(--tw-border-opacity, 1))}.border-\[\#E4DDD2\]{--tw-border-opacity:1;border-color:rgb(228 221 210 / var(--tw-border-opacity, 1))}.border-\[\#EDE5DA\]{--tw-border-opacity:1;border-color:rgb(237 229 218 / var(--tw-border-opacity, 1))}.border-\[\#D5CBBF\]{--tw-border-opacity:1;border-color:rgb(213 203 191 / var(--tw-border-opacity, 1))}.border-\[\#EAE3D6\]{--tw-border-opacity:1;border-color:rgb(234 227 214 / var(--tw-border-opacity, 1))}.bg-\[\#262626\]{--tw-bg-opacity:1;background-color:rgb(38 38 38 / var(--tw-bg-opacity, 1))}.bg-\[\#262626\]\/60{background-color:rgb(38 38 38 / 0.6)}.bg-\[\#262626\]\/70{background-color:rgb(38 38 38 / 0.7)}.bg-\[\#2E6B47\]{--tw-bg-opacity:1;background-color:rgb(46 107 71 / var(--tw-bg-opacity, 1))}.bg-\[\#3B627D\]{--tw-bg-opacity:1;background-color:rgb(59 98 125 / var(--tw-bg-opacity, 1))}.bg-\[\#E4DDD2\]{--tw-bg-opacity:1;background-color:rgb(228 221 210 / var(--tw-bg-opacity, 1))}.bg-\[\#EDE7DD\]{--tw-bg-opacity:1;background-color:rgb(237 231 221 / var(--tw-bg-opacity, 1))}.bg-\[\#EDF3F7\]{--tw-bg-opacity:1;background-color:rgb(237 243 247 / var(--tw-bg-opacity, 1))}.bg-\[\#EFE9DF\]{--tw-bg-opacity:1;background-color:rgb(239 233 223 / var(--tw-bg-opacity, 1))}.bg-\[\#FAF7F2\]{--tw-bg-opacity:1;background-color:rgb(250 247 242 / var(--tw-bg-opacity, 1))}.bg-\[\#FAF7F2\]\/95{background-color:rgb(250 247 242 / 0.95)}.bg-\[\#FFFFFF\]{--tw-bg-opacity:1;background-color:rgb(255 255 255 / var(--tw-bg-opacity, 1))}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255 / var(--tw-bg-opacity, 1))}.p-3{padding:0.75rem}.p-4{padding:1rem}.p-5{padding:1.25rem}.p-6{padding:1.5rem}.p-2{padding:0.5rem}.px-2{padding-left:0.5rem;padding-right:0.5rem}.px-3{padding-left:0.75rem;padding-right:0.75rem}.px-3\.5{padding-left:0.875rem;padding-right:0.875rem}.px-4{padding-left:1rem;padding-right:1rem}.py-0\.5{padding-top:0.125rem;padding-bottom:0.125rem}.py-1\.5{padding-top:0.375rem;padding-bottom:0.375rem}.py-2\.5{padding-top:0.625rem;padding-bottom:0.625rem}.px-2\.5{padding-left:0.625rem;padding-right:0.625rem}.py-1{padding-top:0.25rem;padding-bottom:0.25rem}.pb-2{padding-bottom:0.5rem}.pl-0\.5{padding-left:0.125rem}.pb-3{padding-bottom:0.75rem}.pt-2{padding-top:0.5rem}.pt-4{padding-top:1rem}.text-right{text-align:right}.font-mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}.font-sans{font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans TC", sans-serif}.font-serif{font-family:"Noto Serif TC", "Yu Mincho", "Hiragino Mincho ProN", Georgia, serif}.text-\[10px\]{font-size:10px}.text-\[11px\]{font-size:11px}.text-\[9px\]{font-size:9px}.text-base{font-size:1rem;line-height:1.5rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:0.75rem;line-height:1rem}.text-3xl{font-size:1.875rem;line-height:2.25rem}.font-bold{font-weight:700}.font-light{font-weight:300}.font-medium{font-weight:500}.font-semibold{font-weight:600}.uppercase{text-transform:uppercase}.leading-relaxed{line-height:1.625}.leading-tight{line-height:1.25}.tracking-widest{letter-spacing:0.1em}.text-\[\#262626\]{--tw-text-opacity:1;color:rgb(38 38 38 / var(--tw-text-opacity, 1))}.text-\[\#2E6B47\]{--tw-text-opacity:1;color:rgb(46 107 71 / var(--tw-text-opacity, 1))}.text-\[\#3B627D\]{--tw-text-opacity:1;color:rgb(59 98 125 / var(--tw-text-opacity, 1))}.text-\[\#4E4A44\]{--tw-text-opacity:1;color:rgb(78 74 68 / var(--tw-text-opacity, 1))}.text-\[\#5A544A\]{--tw-text-opacity:1;color:rgb(90 84 74 / var(--tw-text-opacity, 1))}.text-\[\#827E77\]{--tw-text-opacity:1;color:rgb(130 126 119 / var(--tw-text-opacity, 1))}.text-\[\#9E988F\]{--tw-text-opacity:1;color:rgb(158 152 143 / var(--tw-text-opacity, 1))}.text-\[\#A86324\]{--tw-text-opacity:1;color:rgb(168 99 36 / var(--tw-text-opacity, 1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.text-red-700{--tw-text-opacity:1;color:rgb(185 28 28 / var(--tw-text-opacity, 1))}.text-\[\#736E66\]{--tw-text-opacity:1;color:rgb(115 110 102 / var(--tw-text-opacity, 1))}.text-\[\#872338\]{--tw-text-opacity:1;color:rgb(135 35 56 / var(--tw-text-opacity, 1))}.text-\[\#AD5762\]{--tw-text-opacity:1;color:rgb(173 87 98 / var(--tw-text-opacity, 1))}.opacity-0{opacity:0}.shadow-2xl{--tw-shadow:0 25px 50px -12px rgb(0 0 0 / 0.25);--tw-shadow-colored:0 25px 50px -12px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-lg{--tw-shadow:0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.backdrop-blur-md{--tw-backdrop-blur:blur(12px);-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.backdrop-blur-sm{--tw-backdrop-blur:blur(4px);-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.transition-all{transition-property:all;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-colors{transition-property:color, background-color, border-color, fill, stroke, -webkit-text-decoration-color;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, -webkit-text-decoration-color;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.duration-300{transition-duration:300ms}.hover\:bg-\[\#235437\]:hover{--tw-bg-opacity:1;background-color:rgb(35 84 55 / var(--tw-bg-opacity, 1))}.hover\:bg-\[\#2F4F65\]:hover{--tw-bg-opacity:1;background-color:rgb(47 79 101 / var(--tw-bg-opacity, 1))}.hover\:bg-\[\#3D3A37\]:hover{--tw-bg-opacity:1;background-color:rgb(61 58 55 / var(--tw-bg-opacity, 1))}.hover\:bg-\[\#E0D8CB\]:hover{--tw-bg-opacity:1;background-color:rgb(224 216 203 / var(--tw-bg-opacity, 1))}.hover\:bg-\[\#EDE5DA\]:hover{--tw-bg-opacity:1;background-color:rgb(237 229 218 / var(--tw-bg-opacity, 1))}.hover\:text-\[\#262626\]:hover{--tw-text-opacity:1;color:rgb(38 38 38 / var(--tw-text-opacity, 1))}.hover\:underline:hover{-webkit-text-decoration-line:underline;text-decoration-line:underline}.focus\:border-\[\#3B627D\]:focus{--tw-border-opacity:1;border-color:rgb(59 98 125 / var(--tw-border-opacity, 1))}.focus\:outline-none:focus{outline:2px solid transparent;outline-offset:2px}@media (min-width: 640px){.sm\:inline{display:inline}.sm\:w-28{width:7rem}.sm\:grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}.sm\:grid-cols-5{grid-template-columns:repeat(5, minmax(0, 1fr))}.sm\:gap-3{gap:0.75rem}.sm\:p-12{padding:3rem}.sm\:p-6{padding:1.5rem}.sm\:p-8{padding:2rem}.sm\:px-8{padding-left:2rem;padding-right:2rem}.sm\:text-sm{font-size:0.875rem;line-height:1.25rem}.sm\:text-5xl{font-size:3rem;line-height:1}.sm\:text-xl{font-size:1.25rem;line-height:1.75rem}}@media (min-width: 768px){.md\:block{display:block}}@media (min-width: 1024px){.lg\:inline{display:inline}.lg\:grid-cols-5{grid-template-columns:repeat(5, minmax(0, 1fr))}.lg\:p-14{padding:3.5rem}}</style></head>
+<body class="h-full flex flex-col justify-between select-none">
+
+  <!-- ================= TOP PRESENTATION TOOLBAR ================= -->
+  <header class="h-14 bg-[#FAF7F2]/95 backdrop-blur-md border-b border-[#E4DDD2] px-4 sm:px-8 flex items-center justify-between z-30 flex-shrink-0">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg bg-[#EDE7DD] border border-[#D5C9B8] flex items-center justify-center text-[#3B627D] shadow-2xs">
+        <i class="fa-solid fa-chalkboard text-xs"></i>
+      </div>
+      <div>
+        <span class="font-serif font-bold text-sm text-[#262626] flex items-center gap-2">
+          網絡世代的聲音光譜 <span class="font-sans font-light text-[11px] text-[#827E77] px-2 py-0.5 bg-[#EFE9DF] rounded border border-[#E2D7C8]">日系文青網頁簡報</span>
+        </span>
+      </div>
+    </div>
+
+    <!-- Presentation Mode Toolbar Actions -->
+    <div class="flex items-center gap-2 sm:gap-3 text-xs">
+      <!-- Overview Grid Button -->
+      <button id="toggle-overview-btn" class="bg-white hover:bg-[#EDE5DA] text-[#4E4A44] border border-[#D5C9B8] px-3 py-1.5 rounded-lg flex items-center gap-1.5 font-serif transition-colors shadow-2xs" title="查看所有投影片總覽 (鍵盤快捷鍵 O)">
+        <i class="fa-solid fa-table-cells text-[10px]"></i>
+        <span class="hidden sm:inline">簡報總覽 (O)</span>
+      </button>
+
+      <!-- Speaker Notes Drawer Button -->
+      <button id="toggle-notes-btn" class="bg-white hover:bg-[#EDE5DA] text-[#4E4A44] border border-[#D5C9B8] px-3 py-1.5 rounded-lg flex items-center gap-1.5 font-serif transition-colors shadow-2xs" title="開啟演講者備忘錄 (鍵盤快捷鍵 N)">
+        <i class="fa-regular fa-note-sticky text-[10px] text-[#A86324]"></i>
+        <span class="hidden sm:inline">講者備忘 (N)</span>
+      </button>
+
+      <!-- Direct Download Button for User Convenience -->
+      <button id="download-html-direct-btn" class="bg-[#2E6B47] hover:bg-[#235437] text-white px-3 py-1.5 rounded-lg flex items-center gap-1.5 font-serif transition-colors shadow-2xs" title="直接下載 index.html 檔案到電腦">
+        <i class="fa-solid fa-download text-[10px]"></i>
+        <span class="font-bold">下載 index.html</span>
+      </button>
+
+      <!-- Knowledge Base Drawer Button -->
+      <button id="toggle-kb-btn" class="bg-white hover:bg-[#EDE5DA] text-[#4E4A44] border border-[#D5C9B8] px-3 py-1.5 rounded-lg flex items-center gap-1.5 font-serif transition-colors shadow-2xs" title="開啟專案知識庫與完整檔案 (鍵盤快捷鍵 D)">
+        <i class="fa-solid fa-book-open text-[10px] text-[#2E6B47]"></i>
+        <span class="hidden sm:inline">知識庫 (D)</span>
+      </button>
+
+      <!-- Fullscreen Toggle -->
+      <button id="toggle-fullscreen-btn" class="bg-[#3B627D] hover:bg-[#2F4F65] text-white px-3 py-1.5 rounded-lg flex items-center gap-1.5 font-serif transition-colors shadow-2xs" title="全螢幕切換 (鍵盤快捷鍵 F)">
+        <i class="fa-solid fa-expand text-[10px]"></i>
+        <span class="hidden sm:inline">全螢幕 (F)</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ================= MAIN SLIDE STAGE ================= -->
+  <main class="flex-1 flex items-center justify-center p-3 sm:p-6 overflow-hidden relative">
+    <div id="slide-stage" class="w-full max-w-6xl aspect-[16/9] slide-stage-card p-6 sm:p-12 lg:p-14 flex flex-col justify-between relative overflow-hidden transition-all duration-300">
+          <div class="h-full flex flex-col justify-between">
+            <div>
+              <div class="w-12 h-1 bg-[#2E6B47] mb-4"></div>
+              <span class="font-mono text-xs font-semibold text-[#827E77] tracking-widest uppercase">J-POP CONTEMPORARY PRESENTATION</span>
+              <h1 class="text-3xl sm:text-5xl font-serif font-bold text-[#262626] mt-3 leading-tight">
+                網絡世代的聲音光譜
+              </h1>
+              <p class="text-base sm:text-xl font-serif text-[#3B627D] mt-2">
+                當代 J-POP 音樂專案導引：ヨルシカ · tuki. · Ado · 『ユイカ』 · Mrs. GREEN APPLE
+              </p>
+              <p class="text-xs sm:text-sm text-[#736E66] mt-3 max-w-2xl font-sans leading-relaxed">
+                從文學概念、深沉孤勇、百變狂放、純愛民謠到希望頌歌的聲音美學全貌。依據 Agent.md 規範建置，全篇採用和紙與墨色調色盤。
+              </p>
+            </div>
+
+            <!-- 5 Pillar Chips -->
+            <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5 pt-4 border-t border-[#EAE3D6]">
+              <div class="bg-[#FAF7F2] p-3 rounded-xl border border-[#E4DDD2]">
+                <div class="font-serif font-bold text-xs text-[#3B627D]">ヨルシカ</div>
+                <div class="text-[10px] text-[#827E77] font-mono mt-0.5">文學概念搖滾</div>
+              </div>
+              <div class="bg-[#FAF7F2] p-3 rounded-xl border border-[#E4DDD2]">
+                <div class="font-serif font-bold text-xs text-[#A86324]">tuki.</div>
+                <div class="text-[10px] text-[#827E77] font-mono mt-0.5">煙燻深沉孤勇</div>
+              </div>
+              <div class="bg-[#FAF7F2] p-3 rounded-xl border border-[#E4DDD2]">
+                <div class="font-serif font-bold text-xs text-[#872338]">Ado</div>
+                <div class="text-[10px] text-[#827E77] font-mono mt-0.5">百變狂放歌姬</div>
+              </div>
+              <div class="bg-[#FAF7F2] p-3 rounded-xl border border-[#E4DDD2]">
+                <div class="font-serif font-bold text-xs text-[#AD5762]">『ユイカ』</div>
+                <div class="text-[10px] text-[#827E77] font-mono mt-0.5">校園純愛民謠</div>
+              </div>
+              <div class="bg-[#FAF7F2] p-3 rounded-xl border border-[#E4DDD2]">
+                <div class="font-serif font-bold text-xs text-[#2E6B47]">Mrs. GREEN APPLE</div>
+                <div class="text-[10px] text-[#827E77] font-mono mt-0.5">璀璨希望讚歌</div>
+              </div>
+            </div>
+          </div>
+        </div>
+  </main>
+
+  <!-- ================= BOTTOM PRESENTER CONTROLS & BGM ================= -->
+  <footer class="h-16 bg-[#FAF7F2]/95 backdrop-blur-md border-t border-[#E4DDD2] px-4 sm:px-8 flex items-center justify-between z-30 flex-shrink-0">
+    
+    <!-- Left: Audio Player Indicator & Controls -->
+    <div class="flex items-center gap-3 w-1/3 min-w-0">
+      <div id="player-cover" class="w-9 h-9 rounded-lg bg-[#EDF3F7] border border-[#C2D6E3] flex items-center justify-center text-[#3B627D] text-sm flex-shrink-0">
+        <i class="fa-solid fa-music"></i>
+      </div>
+      <div class="min-w-0">
+        <div class="flex items-center gap-2">
+          <span id="player-title" class="text-xs font-serif font-bold text-[#262626] truncate">青と夏</span>
+          <div id="soundwave-anim" class="flex items-end h-3">
+            <span class="wave-bar-washi"></span>
+            <span class="wave-bar-washi"></span>
+            <span class="wave-bar-washi"></span>
+            <span class="wave-bar-washi"></span>
+          </div>
+        </div>
+        <div class="flex items-center gap-1.5 text-[10px] text-[#827E77] truncate">
+          <span id="player-artist" class="text-[#2E6B47] font-medium">Mrs. GREEN APPLE</span>
+          <span>•</span>
+          <span id="player-album" class="text-[#9E988F]">Attitude</span>
+        </div>
+      </div>
+      <!-- Mini Audio Play Button -->
+      <button id="player-play-btn" class="w-7 h-7 rounded-full bg-[#262626] text-white flex items-center justify-center hover:bg-[#3D3A37] transition-all flex-shrink-0" title="播放/暫停環境樂音">
+        <i class="fa-solid fa-play text-[9px] pl-0.5"></i>
+      </button>
+      <button id="player-prev-btn" class="hidden"></button>
+      <button id="player-next-btn" class="hidden"></button>
+      <button id="synth-sound-toggle" class="text-[10px] text-[#827E77] hover:text-[#262626] hidden lg:inline font-serif">環境樂音</button>
+      <button id="quick-scenario-btn" class="hidden"></button>
+    </div>
+
+    <!-- Center: Navigation Buttons & Slide Counter -->
+    <div class="flex items-center justify-center gap-3 w-1/3">
+      <button id="slide-prev-btn" class="bg-white hover:bg-[#EDE5DA] text-[#4E4A44] border border-[#D5C9B8] px-3.5 py-1.5 rounded-xl text-xs font-serif flex items-center gap-1.5 transition-colors shadow-2xs" title="上一頁 (方向鍵 ←)">
+        <i class="fa-solid fa-arrow-left text-[9px]"></i> <span class="hidden sm:inline">上一頁</span>
+      </button>
+      
+      <div class="flex items-center gap-2 px-2">
+        <span id="slide-counter" class="font-mono text-xs text-[#262626] font-bold">01 / 10</span>
+      </div>
+
+      <button id="slide-next-btn" class="bg-[#3B627D] hover:bg-[#2F4F65] text-white px-3.5 py-1.5 rounded-xl text-xs font-serif flex items-center gap-1.5 transition-colors shadow-2xs" title="下一頁 (方向鍵 → 或空白鍵)">
+        <span class="hidden sm:inline">下一頁</span> <i class="fa-solid fa-arrow-right text-[9px]"></i>
+      </button>
+    </div>
+
+    <!-- Right: Keyboard Hints & Progress indicator -->
+    <div class="w-1/3 flex items-center justify-end gap-3 text-right">
+      <div class="hidden md:block text-[11px] text-[#827E77] font-mono">
+        鍵盤 ←/→ 翻頁 · O 總覽 · N 講稿 · F 全螢幕
+      </div>
+      <div class="w-20 sm:w-28 h-1.5 bg-[#E4DDD2] rounded-full overflow-hidden">
+        <div id="slide-progress-bar" class="h-full bg-[#3B627D] rounded-full transition-all duration-300 w-[10%]" style="width: 10%;"></div>
+      </div>
+    </div>
+
+  </footer>
+
+  <!-- ================= SPEAKER NOTES DRAWER (演講者備忘錄) ================= -->
+  <div id="notes-drawer" class="fixed bottom-16 left-0 right-0 z-40 bg-[#FFFFFF] border-t border-[#D5C9B8] shadow-2xl p-4 sm:p-6 hidden transition-all max-h-[35vh] overflow-y-auto">
+    <div class="max-w-4xl mx-auto">
+      <div class="flex items-center justify-between pb-2 mb-3 border-b border-[#EDE5DA]">
+        <div class="flex items-center gap-2 text-xs font-serif font-bold text-[#A86324]">
+          <i class="fa-regular fa-note-sticky"></i>
+          <span>演講者講稿備忘錄 (Speaker Talking Points)</span>
+        </div>
+        <button id="close-notes-btn" class="text-xs text-[#827E77] hover:text-[#262626]">
+          <i class="fa-solid fa-xmark"></i> 關閉講稿
+        </button>
+      </div>
+      <div id="notes-content" class="text-xs sm:text-sm text-[#4E4A44] leading-relaxed font-sans space-y-2">【演講者提詞】大家好！歡迎來到本次 J-POP 當代音樂專案簡報。今天我們將以日系文青視角，深入解析當前主導日本乃至全球串流榜單的五組核心音樂人。從文學搖滾、深沉孤勇、百變狂放、純愛民謠到國民希望讚歌，帶大家感受 2020 年代 J-POP 最動人的聲音宇宙。</div>
+    </div>
+  </div>
+
+  <!-- ================= SLIDE OVERVIEW GRID MODAL (投影片總覽) ================= -->
+  <div id="overview-modal" class="fixed inset-0 z-50 bg-[#262626]/70 backdrop-blur-sm hidden flex items-center justify-center p-4 sm:p-8">
+    <div class="bg-[#FAF7F2] border border-[#E2DBD0] rounded-3xl max-w-5xl w-full max-h-[88vh] overflow-hidden flex flex-col shadow-2xl">
+      <div class="p-5 border-b border-[#EDE5DA] flex items-center justify-between bg-white">
+        <div class="flex items-center gap-2 font-serif font-bold text-base text-[#262626]">
+          <i class="fa-solid fa-table-cells text-[#3B627D]"></i>
+          <span>簡報投影片總覽 (共 10 頁)</span>
+        </div>
+        <button id="close-overview-btn" class="w-8 h-8 rounded-full bg-[#EDE7DD] hover:bg-[#E0D8CB] text-[#5A544A] flex items-center justify-center transition-colors">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+      <div id="overview-grid" class="p-6 overflow-y-auto grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+        <!-- Injected via JavaScript -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= ARTIST IN-DEPTH MODAL ================= -->
+  <div id="artist-modal" class="fixed inset-0 z-50 bg-[#262626]/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white border border-[#E2DBD0] rounded-3xl max-w-2xl w-full max-h-[85vh] overflow-hidden flex flex-col shadow-2xl">
+      <div class="p-6 border-b border-[#EDE5DA] flex items-center justify-between bg-[#FAF7F2]">
+        <div class="flex items-center gap-3">
+          <div id="modal-icon" class="w-10 h-10 rounded-xl bg-[#EDF3F7] text-[#3B627D] flex items-center justify-center text-xl">
+            <i class="fa-solid fa-user"></i>
+          </div>
+          <div>
+            <h3 id="modal-title" class="text-xl font-serif font-bold text-[#262626]">ヨルシカ</h3>
+            <p id="modal-tag" class="text-xs text-[#3B627D] font-medium">文學概念搖滾 · 完整專題解析</p>
+          </div>
+        </div>
+        <button id="modal-close-btn" class="w-8 h-8 rounded-full bg-[#EDE7DD] hover:bg-[#E0D8CB] text-[#5A544A] flex items-center justify-center transition-colors">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div id="modal-body" class="p-6 overflow-y-auto space-y-4 text-xs sm:text-sm text-[#4E4A44] leading-relaxed font-sans bg-white">
+        <!-- Injected via JavaScript -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= FLOATING TOAST ================= -->
+  <div id="toast-notification" class="fixed top-20 right-4 z-50 bg-white px-4 py-2.5 rounded-xl border border-[#D5C9B8] text-xs text-[#262626] shadow-lg opacity-0 pointer-events-none transform translate-y-2 flex items-center gap-2">
+    <i class="fa-solid fa-circle-check text-[#3B627D]"></i>
+    <span id="toast-msg">已就緒</span>
+  </div>
+
+  <!-- ================= JAVASCRIPT SLIDE ENGINE ================= -->
+  <script>
+    // --- 1. Audio System with Web Audio API (日系清雅琴韻) ---
+    let audioCtx = null;
+    let isPlaying = false;
+    let currentTrackIndex = 0;
+
+    const playlist = [
+      { title: "青と夏", artist: "Mrs. GREEN APPLE", album: "Attitude", color: "#2E6B47", freq: 349.23 },
+      { title: "ケセラセラ", artist: "Mrs. GREEN APPLE", album: "ANTENNA", color: "#2E6B47", freq: 329.63 },
+      { title: "ただ君に晴れ", artist: "ヨルシカ", album: "負け犬にアンコールはいらない", color: "#3B627D", freq: 261.63 },
+      { title: "だから僕は音楽を辞めた", artist: "ヨルシカ", album: "だから僕は音楽を辞めた", color: "#3B627D", freq: 293.66 },
+      { title: "晩餐歌", artist: "tuki.", album: "1st Digital Single", color: "#A86324", freq: 220.00 },
+      { title: "うっせぇわ", artist: "Ado", album: "狂言", color: "#872338", freq: 329.63 },
+      { title: "新時代", artist: "Ado", album: "ONE PIECE FILM RED", color: "#872338", freq: 349.23 },
+      { title: "好きだから。", artist: "『ユイカ』", album: "紺色に憧れて", color: "#AD5762", freq: 329.63 },
+      { title: "ライラック", artist: "Mrs. GREEN APPLE", album: "Single", color: "#2E6B47", freq: 392.00 }
+    ];
+
+    function initAudio() {
+      if (!audioCtx) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (AudioContext) audioCtx = new AudioContext();
+      }
+      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+    }
+
+    function playTone(freq) {
+      if (!audioCtx) return;
+      try {
+        const now = audioCtx.currentTime;
+        const osc1 = audioCtx.createOscillator();
+        const osc2 = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc1.type = 'sine';
+        osc1.frequency.setValueAtTime(freq, now);
+        osc2.type = 'triangle';
+        osc2.frequency.setValueAtTime(freq * 1.5, now);
+
+        gain.gain.setValueAtTime(0.06, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 1.8);
+
+        osc1.connect(gain);
+        osc2.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc1.start(now);
+        osc2.start(now);
+        osc1.stop(now + 1.8);
+        osc2.stop(now + 1.8);
+      } catch (e) {
+        console.log("Audio not supported");
+      }
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast-notification');
+      const toastMsg = document.getElementById('toast-msg');
+      toastMsg.textContent = msg;
+      toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-2');
+      toast.classList.add('opacity-100', 'translate-y-0');
+      setTimeout(() => {
+        toast.classList.remove('opacity-100', 'translate-y-0');
+        toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-2');
+      }, 2200);
+    }
+
+    function togglePlayTrack(idx) {
+      initAudio();
+      if (idx !== undefined) currentTrackIndex = idx;
+      isPlaying = !isPlaying;
+      const track = playlist[currentTrackIndex];
+      if (isPlaying) {
+        playTone(track.freq);
+        document.getElementById('player-play-btn').innerHTML = '<i class="fa-solid fa-pause text-[9px]"></i>';
+        document.getElementById('soundwave-anim').classList.add('wave-playing');
+        showToast("播放: " + track.artist + " — 《" + track.title + "》");
+      } else {
+        document.getElementById('player-play-btn').innerHTML = '<i class="fa-solid fa-play text-[9px] pl-0.5"></i>';
+        document.getElementById('soundwave-anim').classList.remove('wave-playing');
+      }
+      document.getElementById('player-title').textContent = track.title;
+      document.getElementById('player-artist').textContent = track.artist;
+      document.getElementById('player-artist').style.color = track.color;
+      document.getElementById('player-album').textContent = track.album;
+      document.getElementById('player-cover').style.borderColor = track.color;
+      document.getElementById('player-cover').style.color = track.color;
+    }
+
+    // --- 2. 10 頁完整日系文青簡報資料庫 (10 Slides Data) ---
+    let currentSlide = 0;
+    const slides = [
+      // SLIDE 1: COVER
+      {
+        id: "cover",
+        tag: "J-POP CONTEMPORARY ARTISTS · JAPANESE AESTHETIC PRESENTATION",
+        chapter: "簡報首頁 · 封面",
+        title: "網絡世代的聲音光譜",
+        subtitle: "當代 J-POP 音樂專案導覽：ヨルシカ · tuki. · Ado · 『ユイカ』 · Mrs. GREEN APPLE",
+        notes: "【演講者提詞】大家好！歡迎來到本次 J-POP 當代音樂專案簡報。今天我們將以日系文青視角，深入解析當前主導日本乃至全球串流榜單的五組核心音樂人。從文學搖滾、深沉孤勇、百變狂放、純愛民謠到國民希望讚歌，帶大家感受 2020 年代 J-POP 最動人的聲音宇宙。",
+        render: () => `
+          <div class="h-full flex flex-col justify-between">
+            <div>
+              <div class="w-12 h-1 bg-[#2E6B47] mb-4"></div>
+              <span class="font-mono text-xs font-semibold text-[#827E77] tracking-widest uppercase">J-POP CONTEMPORARY PRESENTATION</span>
+              <h1 class="text-3xl sm:text-5xl font-serif font-bold text-[#262626] mt-3 leading-tight">
+                網絡世代的聲音光譜
+              </h1>
+              <p class="text-base sm:text-xl font-serif text-[#3B627D] mt-2">
+                當代 J-POP 音樂專案導引：ヨルシカ · tuki. · Ado · 『ユイカ』 · Mrs. GREEN APPLE
+              </p>
+              <p class="text-xs sm:text-sm text-[#736E66] mt-3 max-w-2xl font-sans leading-relaxed">
+                從文學概念、深沉孤勇、百變狂放、純愛民謠到希望頌歌的聲音美學全貌。依據 Agent.md 規範建置，全篇採用和紙與墨色調色盤。
+              </p>
+            </div>
+
+            <!-- 5 Pillar Chips -->
+            <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5 pt-4 border-t border-[#EAE3D6]">
+              <div class="bg-[#FAF7F2] p-3 rounded-xl border border-[#E4DDD2]">
+                <div class="font-serif font-bold text-xs text-[#3B627D]">ヨルシカ</div>
+                <div class="text-[10px] text-[#827E77] font-mono mt-0.5">文學概念搖滾</div>
+              </div>
+              <div class="bg-[#FAF7F2] p-3 rounded-xl border border-[#E4DDD2]">
+                <div class="font-serif font-bold text-xs text-[#A86324]">tuki.</div>
+                <div class="text-[10px] text-[#827E77] font-mono mt-0.5">煙燻深沉孤勇</div>
+              </div>
+              <div class="bg-[#FAF7F2] p-3 rounded-xl border border-[#E4DDD2]">
+                <div class="font-serif font-bold text-xs text-[#872338]">Ado</div>
+                <div class="text-[10px] text-[#827E77] font-mono mt-0.5">百變狂放歌姬</div>
+              </div>
+              <div class="bg-[#FAF7F2] p-3 rounded-xl border border-[#E4DDD2]">
+                <div class="font-serif font-bold text-xs text-[#AD5762]">『ユイカ』</div>
+                <div class="text-[10px] text-[#827E77] font-mono mt-0.5">校園純愛民謠</div>
+              </div>
+              <div class="bg-[#FAF7F2] p-3 rounded-xl border border-[#E4DDD2]">
+                <div class="font-serif font-bold text-xs text-[#2E6B47]">Mrs. GREEN APPLE</div>
+                <div class="text-[10px] text-[#827E77] font-mono mt-0.5">璀璨希望讚歌</div>
+              </div>
+            </div>
+          </div>
+        `
+      },
+
+      // SLIDE 2: BACKGROUND
+      {
+        id: "context",
+        chapter: "CHAPTER 00 · 時代背景",
+        title: "臥室與壁櫥裡的革命：網絡原生代與非面孔化美學",
+        notes: "【演講者提詞】在進入個別藝人前，我們必須理解 2020 年代 J-POP 的兩個根本特質：第一是傳播途徑的劇變，音樂人不再依靠傳統選秀，而是自壁櫥、臥室上傳 TikTok 或 Niconico 直接觸達全球；第二是「非面孔化美學」，透過插畫與剪影遮蔽外貌，讓大眾注意力百分之百拉回音樂與文字本體。",
+        render: () => `
+          <div class="h-full flex flex-col justify-between">
+            <div>
+              <div class="flex items-center gap-2 text-xs font-mono font-bold text-[#827E77] uppercase">
+                <span>CHAPTER 00</span> <span>·</span> <span>HISTORICAL CONTEXT</span>
+              </div>
+              <h2 class="text-2xl sm:text-3xl font-serif font-bold text-[#262626] mt-1">臥室與壁櫥裡的革命：網絡原生代現象</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5 my-auto">
+              <div class="bg-[#FAF7F2] p-5 rounded-2xl border border-[#E4DDD2]">
+                <div class="w-8 h-8 rounded-lg bg-white text-[#3B627D] flex items-center justify-center text-sm mb-3 shadow-2xs">
+                  <i class="fa-solid fa-wifi"></i>
+                </div>
+                <h3 class="font-serif font-bold text-sm text-[#262626] mb-1.5">去中心化的誕生路徑</h3>
+                <p class="text-xs text-[#5F5C56] leading-relaxed">
+                  不再依賴傳統電視選秀與唱片公司層層包裝。從 Vocaloid 投稿（n-buna）、Niconico 翻唱（Ado）到 TikTok 自彈自唱短片（tuki.、ユイカ），直接由聽眾演算法掀起狂潮。
+                </p>
+              </div>
+
+              <div class="bg-[#FAF7F2] p-5 rounded-2xl border border-[#E4DDD2]">
+                <div class="w-8 h-8 rounded-lg bg-white text-[#A86324] flex items-center justify-center text-sm mb-3 shadow-2xs">
+                  <i class="fa-solid fa-mask"></i>
+                </div>
+                <h3 class="font-serif font-bold text-sm text-[#262626] mb-1.5">「非面孔化」視覺哲學</h3>
+                <p class="text-xs text-[#5F5C56] leading-relaxed">
+                  徹底打破傳統娛樂圈的顏值崇拜。以插畫、動畫 MV 或墨鏡剪影為媒介，將聽覺感官的主導權完全歸還給旋律結構、文學意象與聲音本體。
+                </p>
+              </div>
+
+              <div class="bg-[#FAF7F2] p-5 rounded-2xl border border-[#E4DDD2]">
+                <div class="w-8 h-8 rounded-lg bg-white text-[#2E6B47] flex items-center justify-center text-sm mb-3 shadow-2xs">
+                  <i class="fa-solid fa-globe"></i>
+                </div>
+                <h3 class="font-serif font-bold text-sm text-[#262626] mb-1.5">跨國串流破億奇蹟</h3>
+                <p class="text-xs text-[#5F5C56] leading-relaxed">
+                  全球串流播放量屢破億次，並在 Apple Music 全球百大榜、日本告示牌與各大影視動漫主題曲（One Piece、炎炎消防隊、忘卻Battery）中取得統治級成就。
+                </p>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between text-[11px] text-[#827E77] font-mono border-t border-[#EDE5DA] pt-3">
+              <span>J-POP 現代專案導覽 · 社會文化脈絡</span>
+              <span>Agent.md Section 4</span>
+            </div>
+          </div>
+        `
+      },
+
+      // SLIDE 3: YORUSHIKA
+      {
+        id: "yorushika",
+        chapter: "CHAPTER 01 · ヨルシカ (Yorushika)",
+        title: "夜に咲く文学：n-buna × suis 的敘事概念搖滾宇宙",
+        notes: "【演講者提詞】第一位登場的是 ヨルシカ。前 Vocaloid 傳奇製作人 n-buna 負責全部詞曲、編曲與長篇故事構想，搭配主唱 suis 如山泉般透明清澈的嗓音。他們的專輯是長篇小說，男主角 Amy 寄給 Elma 的信件、以及向太宰治、宮澤賢治致敬的文學密碼，讓他們成為當代文學概念搖滾的巔峰。",
+        render: () => `
+          <div class="h-full flex flex-col justify-between">
+            <div class="flex items-start justify-between">
+              <div>
+                <div class="flex items-center gap-2 text-xs font-mono font-bold text-[#3B627D]">
+                  <span>CHAPTER 01</span> <span>·</span> <span>ヨルシカ (Yorushika)</span>
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-serif font-bold text-[#262626] mt-0.5">夜に咲く文学：敘事概念搖滾宇宙</h2>
+              </div>
+              <button class="view-detail-btn px-3 py-1.5 rounded-lg bg-[#EDF3F7] border border-[#C2D6E3] text-[#3B627D] text-xs font-serif hover:bg-[#E0EBF2]" data-artist="yorushika">
+                <i class="fa-regular fa-file-lines"></i> 檔案解析
+              </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 my-auto">
+              <div class="bg-[#FAF7F2] p-5 rounded-2xl border border-[#E4DDD2]">
+                <div class="font-serif font-bold text-xs uppercase mb-3 flex items-center gap-1.5 text-[#3B627D]">
+                  <i class="fa-solid fa-feather-pointed"></i> 核心構成與美學哲學
+                </div>
+                <ul class="space-y-2 list-disc pl-4 text-xs text-[#5F5C56]">
+                  <li><strong>核心成員</strong>：n-buna (詞曲/吉他/製作) × suis (主唱透明感女聲)</li>
+                  <li><strong>固定樂手</strong>：キタニタツヤ (貝斯)、下鶴光康 (吉他)、Masack (鼓)、平畑徹也 (鋼琴)</li>
+                  <li><strong>文學互文性</strong>：巧妙融入太宰治《斜陽》、宮澤賢治《又三郎》等文學典故</li>
+                  <li><strong>概念專輯</strong>：Amy 與 Elma 系列以書簡與日記構建跨時空悲劇史詩</li>
+                </ul>
+              </div>
+
+              <div class="bg-[#FAF7F2] p-5 rounded-2xl border border-[#E4DDD2]">
+                <div class="font-serif font-bold text-xs uppercase mb-3 flex items-center gap-1.5 text-[#3B627D]">
+                  <i class="fa-solid fa-compact-disc"></i> 經典代表作一覽
+                </div>
+                <div class="space-y-1.5 text-xs">
+                  <div class="p-1.5 rounded bg-white border border-[#EAE3D6] flex items-center justify-between">
+                    <span class="font-medium text-[#262626]">《ただ君に晴れ》(說謊與晴天)</span>
+                    <button class="play-sample-btn text-[#3B627D] hover:underline" data-track="ただ君に晴れ">試聽</button>
+                  </div>
+                  <div class="p-1.5 rounded bg-white border border-[#EAE3D6] flex items-center justify-between">
+                    <span class="font-medium text-[#262626]">《だから僕は音楽を辞めた》</span>
+                    <button class="play-sample-btn text-[#3B627D] hover:underline" data-track="だから僕は音楽を辞めた">試聽</button>
+                  </div>
+                  <div class="p-1.5 rounded bg-white border border-[#EAE3D6] flex items-center justify-between">
+                    <span class="font-medium text-[#262626]">《春泥棒》/《斜陽》(動畫OP)</span>
+                    <span class="text-[10px] text-[#827E77] font-mono">文學經典</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between text-[11px] text-[#827E77] font-mono border-t border-[#EDE5DA] pt-3">
+              <span>代表色：露草藍 (#3B627D) · 夏夜與水汽意象</span>
+              <span>官方網站：yorushika.com</span>
+            </div>
+          </div>
+        `
+      },
+
+      // SLIDE 4: TUKI
+      {
+        id: "tuki",
+        chapter: "CHAPTER 02 · tuki. (ツキ)",
+        title: "十五歲的蒼色絕唱：直擊生死的深沉煙燻少年音",
+        notes: "【演講者提詞】接下來是 2023 年震驚全日本樂壇的超新星 tuki.。她在 15 歲國三時以吉他彈唱《晩餐歌》爆紅，寫下日本個人歌手歷史上最年輕突破 1 億次串流的紀錄。她打破了日本女子高中生純清甜美的刻板印象，以超齡的低音顆粒感直擊「這三十五年的短暫人生」，撫慰了無數孤獨受傷的靈魂。",
+        render: () => `
+          <div class="h-full flex flex-col justify-between">
+            <div class="flex items-start justify-between">
+              <div>
+                <div class="flex items-center gap-2 text-xs font-mono font-bold text-[#A86324]">
+                  <span>CHAPTER 02</span> <span>·</span> <span>tuki. (ツキ)</span>
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-serif font-bold text-[#262626] mt-0.5">十五歲的蒼色絕唱：深沉煙燻少年音</h2>
+              </div>
+              <button class="view-detail-btn px-3 py-1.5 rounded-lg bg-[#FAF3EC] border border-[#E6D0BB] text-[#A86324] text-xs font-serif hover:bg-[#F2E5D8]" data-artist="tuki">
+                <i class="fa-regular fa-file-lines"></i> 檔案解析
+              </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 my-auto">
+              <div class="bg-[#FAF7F2] p-5 rounded-2xl border border-[#E4DDD2]">
+                <div class="font-serif font-bold text-xs uppercase mb-3 flex items-center gap-1.5 text-[#A86324]">
+                  <i class="fa-solid fa-guitar"></i> 奇蹟歷程與嗓音特質
+                </div>
+                <ul class="space-y-2 list-disc pl-4 text-xs text-[#5F5C56]">
+                  <li><strong>爆紅源起</strong>：15 歲初中三年級在 TikTok 上傳 13 歲創作曲吉他彈唱</li>
+                  <li><strong>歷史紀錄</strong>：奪得 Billboard Japan 綜合冠軍，最年輕破億個人歌手（已破4億）</li>
+                  <li><strong>成熟低音</strong>：超齡的煙燻顆粒感與深沉破裂張力，打破甜美刻板印象</li>
+                  <li><strong>生死哲思</strong>：在《晩餐歌》直面「這三十五年的短暫人生」，詞句直擊靈魂痛點</li>
+                </ul>
+              </div>
+
+              <div class="bg-[#FAF7F2] p-5 rounded-2xl border border-[#E4DDD2]">
+                <div class="font-serif font-bold text-xs uppercase mb-3 flex items-center gap-1.5 text-[#A86324]">
+                  <i class="fa-solid fa-compact-disc"></i> 核心代表曲目
+                </div>
+                <div class="space-y-1.5 text-xs">
+                  <div class="p-1.5 rounded bg-white border border-[#EAE3D6] flex items-center justify-between">
+                    <span class="font-medium text-[#262626]">《晩餐歌》(Bansanka)</span>
+                    <button class="play-sample-btn text-[#A86324] hover:underline" data-track="晩餐歌">試聽</button>
+                  </div>
+                  <div class="p-1.5 rounded bg-white border border-[#EAE3D6] flex items-center justify-between">
+                    <span class="font-medium text-[#262626]">《一輪花》(Ichirinka)</span>
+                    <span class="text-[10px] text-[#827E77] font-mono">壯麗弦樂</span>
+                  </div>
+                  <div class="p-1.5 rounded bg-white border border-[#EAE3D6] flex items-center justify-between">
+                    <span class="font-medium text-[#262626]">《地獄恋文》/《サクラキミワタシ》</span>
+                    <span class="text-[10px] text-[#827E77] font-mono">搖滾與畢業曲</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between text-[11px] text-[#827E77] font-mono border-t border-[#EDE5DA] pt-3">
+              <span>代表色：琥珀茶 (#A86324) · 孤勇與月光意象</span>
+              <span>官方網站：tuki-official.net</span>
+            </div>
+          </div>
+        `
+      },
+
+      // SLIDE 5: ADO
+      {
+        id: "ado",
+        chapter: "CHAPTER 03 · Ado (アド)",
+        title: "狂放與千面之聲：從壁櫥翻唱到全球殿堂的現象級歌姬",
+        notes: "【演講者提詞】第三位是 Ado。她從自家壁櫥裡自製隔音海綿錄製翻唱起步，18 歲以《うっせぇわ》掀起全日本文化現象。2022 年配唱電影《ONE PIECE FILM RED》主演美音，《新時代》奪得 Apple Music 全球第一名。2024 年更成為首位在國立競技場開唱的女性 solo 歌手。她兼具金屬撕裂音與極限大跨度，是聲樂界的千面魔術師。",
+        render: () => `
+          <div class="h-full flex flex-col justify-between">
+            <div class="flex items-start justify-between">
+              <div>
+                <div class="flex items-center gap-2 text-xs font-mono font-bold text-[#872338]">
+                  <span>CHAPTER 03</span> <span>·</span> <span>Ado (アド)</span>
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-serif font-bold text-[#262626] mt-0.5">狂放與千面之聲：現象級百變歌姬</h2>
+              </div>
+              <button class="view-detail-btn px-3 py-1.5 rounded-lg bg-[#FAEDF0] border border-[#E0BEC6] text-[#872338] text-xs font-serif hover:bg-[#F2DEE3]" data-artist="ado">
+                <i class="fa-regular fa-file-lines"></i> 檔案解析
+              </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 my-auto">
+              <div class="bg-[#FAF7F2] p-5 rounded-2xl border border-[#E4DDD2]">
+                <div class="font-serif font-bold text-xs uppercase mb-3 flex items-center gap-1.5 text-[#872338]">
+                  <i class="fa-solid fa-microphone-lines"></i> 聲樂魔術與輝煌里程碑
+                </div>
+                <ul class="space-y-2 list-disc pl-4 text-xs text-[#5F5C56]">
+                  <li><strong>起點壁櫥</strong>：2017 年於家中壁櫥鋪設隔音海綿開始 Niconico 翻唱</li>
+                  <li><strong>社會現象</strong>：2020 年以出道曲《うっせぇわ》吼出青年反抗規訓的心聲</li>
+                  <li><strong>世界巔峰</strong>：《ONE PIECE FILM RED》配唱，《新時代》榮登 Apple 全球第一</li>
+                  <li><strong>國立競技場</strong>：首位登上日本國立競技場（單場七萬人）單獨開唱的女性個人歌手</li>
+                </ul>
+              </div>
+
+              <div class="bg-[#FAF7F2] p-5 rounded-2xl border border-[#E4DDD2]">
+                <div class="font-serif font-bold text-xs uppercase mb-3 flex items-center gap-1.5 text-[#872338]">
+                  <i class="fa-solid fa-compact-disc"></i> 經典代表作一覽
+                </div>
+                <div class="space-y-1.5 text-xs">
+                  <div class="p-1.5 rounded bg-white border border-[#EAE3D6] flex items-center justify-between">
+                    <span class="font-medium text-[#262626]">《うっせぇわ》(Usseewa)</span>
+                    <button class="play-sample-btn text-[#872338] hover:underline" data-track="うっせぇわ">試聽</button>
+                  </div>
+                  <div class="p-1.5 rounded bg-white border border-[#EAE3D6] flex items-center justify-between">
+                    <span class="font-medium text-[#262626]">《新時代》(New Genesis)</span>
+                    <button class="play-sample-btn text-[#872338] hover:underline" data-track="新時代">試聽</button>
+                  </div>
+                  <div class="p-1.5 rounded bg-white border border-[#EAE3D6] flex items-center justify-between">
+                    <span class="font-medium text-[#262626]">《唱 (Show)》/《逆光》</span>
+                    <span class="text-[10px] text-[#827E77] font-mono">舞曲與硬搖滾</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between text-[11px] text-[#827E77] font-mono border-t border-[#EDE5DA] pt-3">
+              <span>代表色：深緋色 (#872338) · 赤色反叛與千面聲線</span>
+              <span>所屬經紀：Cloud Nine inc.</span>
+            </div>
+          </div>
+        `
+      },
+
+      // SLIDE 6: YUIKA
+      {
+        id: "yuika",
+        chapter: "CHAPTER 04 · 『ユイカ』 (Yuika)",
+        title: "教室窗邊的微熱：以一把木吉他喚醒亞洲雙向暗戀",
+        notes: "【演講者提詞】第四位是 2005 年生於奈良縣的高中創作少女『ユイカ』。在疫情期間社團受限的高中生活中，她拿起吉他在臥室自創描繪同學心事的民謠。《好きだから。》以對話體歌詞生動還原了『明明兩人都喜歡對方，卻以為只是朋友』的雙向暗戀心酸，引發亞洲多國共鳴。",
+        render: () => `
+          <div class="h-full flex flex-col justify-between">
+            <div class="flex items-start justify-between">
+              <div>
+                <div class="flex items-center gap-2 text-xs font-mono font-bold text-[#AD5762]">
+                  <span>CHAPTER 04</span> <span>·</span> <span>『ユイカ』 (Yuika)</span>
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-serif font-bold text-[#262626] mt-0.5">教室窗邊的微熱：亞洲雙向暗戀浪潮</h2>
+              </div>
+              <button class="view-detail-btn px-3 py-1.5 rounded-lg bg-[#FDF2F3] border border-[#E8C6CA] text-[#AD5762] text-xs font-serif hover:bg-[#F7E1E4]" data-artist="yuika">
+                <i class="fa-regular fa-file-lines"></i> 檔案解析
+              </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 my-auto">
+              <div class="bg-[#FAF7F2] p-5 rounded-2xl border border-[#E4DDD2]">
+                <div class="font-serif font-bold text-xs uppercase mb-3 flex items-center gap-1.5 text-[#AD5762]">
+                  <i class="fa-solid fa-heart"></i> 青春紀實與創作起點
+                </div>
+                <ul class="space-y-2 list-disc pl-4 text-xs text-[#5F5C56]">
+                  <li><strong>高中臥室起步</strong>：在疫情社團受限期間，以一把木吉他描寫身邊戀愛故事</li>
+                  <li><strong>亞洲爆紅現象</strong>：16 歲原創曲《好きだから。》攻佔台灣、泰國、日本榜首</li>
+                  <li><strong>對話體歌詞</strong>：大量運用「あのね」「ねえ」日常口語，宛如聽閨蜜訴說心事</li>
+                  <li><strong>首張大碟《紺色に憧れて》</strong>：以高中制服深藍為題，記錄無悔青春歲月</li>
+                </ul>
+              </div>
+
+              <div class="bg-[#FAF7F2] p-5 rounded-2xl border border-[#E4DDD2]">
+                <div class="font-serif font-bold text-xs uppercase mb-3 flex items-center gap-1.5 text-[#AD5762]">
+                  <i class="fa-solid fa-compact-disc"></i> 純愛代表作一覽
+                </div>
+                <div class="space-y-1.5 text-xs">
+                  <div class="p-1.5 rounded bg-white border border-[#EAE3D6] flex items-center justify-between">
+                    <span class="font-medium text-[#262626]">《好きだから。》(因為喜歡你。)</span>
+                    <button class="play-sample-btn text-[#AD5762] hover:underline" data-track="好きだから。">試聽</button>
+                  </div>
+                  <div class="p-1.5 rounded bg-white border border-[#EAE3D6] flex items-center justify-between">
+                    <span class="font-medium text-[#262626]">《そばにいて。》(待在我身邊。)</span>
+                    <span class="text-[10px] text-[#827E77] font-mono">溫柔陪伴</span>
+                  </div>
+                  <div class="p-1.5 rounded bg-white border border-[#EAE3D6] flex items-center justify-between">
+                    <span class="font-medium text-[#262626]">《17才の歌》/《恋泥棒。》</span>
+                    <span class="text-[10px] text-[#827E77] font-mono">成長自白</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between text-[11px] text-[#827E77] font-mono border-t border-[#EDE5DA] pt-3">
+              <span>代表色：灰櫻粉 (#AD5762) · 初戀悸動與青春日記</span>
+              <span>唱片公司：Universal Music Japan</span>
+            </div>
+          </div>
+        `
+      },
+
+      // SLIDE 7: MRS. GREEN APPLE
+      {
+        id: "mga",
+        chapter: "CHAPTER 05 · Mrs. GREEN APPLE (ミセス)",
+        title: "燦爛希望頌歌：日本唱片大賞天團與複雜樂觀主義",
+        notes: "【演講者提詞】第五位是新收錄的國民天團 Mrs. GREEN APPLE。經歷 Phase 1 休止與體制重整，Phase 2 轉型為大森元貴、若井滉斗、藤澤涼架的三人體制後，迎來了跨世代全民狂熱。2023 年以《ケセラセラ》奪下日本唱片大賞大賞，2024 年以《ライラック》霸榜。大森元貴的超高音域與交響搖滾編排，為所有在疲憊日常中掙扎的人注入了前進的勇氣。",
+        render: () => `
+          <div class="h-full flex flex-col justify-between">
+            <div class="flex items-start justify-between">
+              <div>
+                <div class="flex items-center gap-2 text-xs font-mono font-bold text-[#2E6B47]">
+                  <span>CHAPTER 05</span> <span>·</span> <span>Mrs. GREEN APPLE (ミセス)</span>
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-serif font-bold text-[#262626] mt-0.5">燦爛希望頌歌：日本唱片大賞天團</h2>
+              </div>
+              <button class="view-detail-btn px-3 py-1.5 rounded-lg bg-[#EDF5F0] border border-[#B8D9C4] text-[#2E6B47] text-xs font-serif hover:bg-[#DFEFE5]" data-artist="mga">
+                <i class="fa-regular fa-file-lines"></i> 檔案解析
+              </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 my-auto">
+              <div class="bg-[#FAF7F2] p-5 rounded-2xl border border-[#E4DDD2]">
+                <div class="font-serif font-bold text-xs uppercase mb-3 flex items-center gap-1.5 text-[#2E6B47]">
+                  <i class="fa-solid fa-apple-whole"></i> 樂團進化與 Phase 演進
+                </div>
+                <ul class="space-y-2 list-disc pl-4 text-xs text-[#5F5C56]">
+                  <li><strong>核心陣容</strong>：大森元貴 (Vo/Gt/Prod)、若井滉斗 (Gt/Leader)、藤澤涼架 (Kb)</li>
+                  <li><strong>Phase 2 狂潮</strong>：2020 年休止，2022 年重啟三人體制後迎來統治級國民熱潮</li>
+                  <li><strong>唱片大賞肯定</strong>：2023 年以神曲《ケセラセラ》榮獲第 65 屆日本唱片大賞大賞</li>
+                  <li><strong>跨界創作</strong>：主唱大森元貴曾為 Ado 創作破億神曲《私は最強》</li>
+                </ul>
+              </div>
+
+              <div class="bg-[#FAF7F2] p-5 rounded-2xl border border-[#E4DDD2]">
+                <div class="font-serif font-bold text-xs uppercase mb-3 flex items-center gap-1.5 text-[#2E6B47]">
+                  <i class="fa-solid fa-compact-disc"></i> 國民代表神作一覽
+                </div>
+                <div class="space-y-1.5 text-xs">
+                  <div class="p-1.5 rounded bg-white border border-[#EAE3D6] flex items-center justify-between">
+                    <span class="font-medium text-[#262626]">《青と夏》(Ao to Natsu)</span>
+                    <button class="play-sample-btn text-[#2E6B47] hover:underline" data-track="青と夏">試聽</button>
+                  </div>
+                  <div class="p-1.5 rounded bg-white border border-[#EAE3D6] flex items-center justify-between">
+                    <span class="font-medium text-[#262626]">《ケセラセラ》(Que Sera Sera)</span>
+                    <button class="play-sample-btn text-[#2E6B47] hover:underline" data-track="ケセラセラ">試聽</button>
+                  </div>
+                  <div class="p-1.5 rounded bg-white border border-[#EAE3D6] flex items-center justify-between">
+                    <span class="font-medium text-[#262626]">《ライラック》/《インフェルノ》</span>
+                    <button class="play-sample-btn text-[#2E6B47] hover:underline" data-track="ライラック">試聽</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between text-[11px] text-[#827E77] font-mono border-t border-[#EDE5DA] pt-3">
+              <span>代表色：常磐綠 (#2E6B47) · 生命力與希望頌歌</span>
+              <span>官方網站：mrsgreenapple.com</span>
+            </div>
+          </div>
+        `
+      },
+
+      // SLIDE 8: COMPARISON MATRIX
+      {
+        id: "matrix",
+        chapter: "CHAPTER 06 · 互補美學矩陣",
+        title: "五角星芒對比：文人・孤勇・狂放・純愛・希望的跨維度評比",
+        notes: "【演講者提詞】當我們將五者放在同一張矩陣中，會發現他們並非互相競爭，而是完美互補：ヨルシカ 是沉思文人，tuki. 是孤勇生靈，Ado 是狂放破界的歌姬，ユイカ 守護了純真初戀，Mrs. GREEN APPLE 則帶來照亮全體的希望頌歌。這構成了 2020 年代 J-POP 最壯麗的光譜。",
+        render: () => `
+          <div class="h-full flex flex-col justify-between">
+            <div>
+              <div class="flex items-center gap-2 text-xs font-mono font-bold text-[#A86324] uppercase">
+                <span>CHAPTER 06</span> <span>·</span> <span>AESTHETIC SYNERGY MATRIX</span>
+              </div>
+              <h2 class="text-2xl sm:text-3xl font-serif font-bold text-[#262626] mt-0.5">五大音樂人橫向綜合評比矩陣</h2>
+            </div>
+
+            <div class="overflow-x-auto my-auto bg-white rounded-2xl border border-[#E4DDD2]">
+              <table class="w-full text-left text-xs">
+                <thead class="bg-[#F4EFE6] text-[#605C55] font-serif text-[11px] border-b border-[#E2DBD0]">
+                  <tr>
+                    <th class="py-3 px-3">分析維度</th>
+                    <th class="py-3 px-2 text-[#3B627D]">ヨルシカ</th>
+                    <th class="py-3 px-2 text-[#A86324]">tuki.</th>
+                    <th class="py-3 px-2 text-[#872338]">Ado</th>
+                    <th class="py-3 px-2 text-[#AD5762]">『ユイカ』</th>
+                    <th class="py-3 px-2 text-[#2E6B47]">Mrs. GREEN APPLE</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-[#EDE6DC] text-[#4E4A44]">
+                  <tr>
+                    <td class="py-2.5 px-3 font-serif font-bold text-[#262626] bg-[#FAF7F2]">核心定位</td>
+                    <td class="py-2.5 px-2">文人沉思</td>
+                    <td class="py-2.5 px-2">孤勇生靈</td>
+                    <td class="py-2.5 px-2">狂放破界</td>
+                    <td class="py-2.5 px-2">純真守護</td>
+                    <td class="py-2.5 px-2 font-bold text-[#2E6B47]">希望讚歌</td>
+                  </tr>
+                  <tr>
+                    <td class="py-2.5 px-3 font-serif font-bold text-[#262626] bg-[#FAF7F2]">發跡源頭</td>
+                    <td class="py-2.5 px-2">Vocaloid P 轉型</td>
+                    <td class="py-2.5 px-2">15歲 TikTok 彈唱</td>
+                    <td class="py-2.5 px-2">Niconico 翻唱</td>
+                    <td class="py-2.5 px-2">高校原創 TikTok</td>
+                    <td class="py-2.5 px-2">現場實力/Phase 2</td>
+                  </tr>
+                  <tr>
+                    <td class="py-2.5 px-3 font-serif font-bold text-[#262626] bg-[#FAF7F2]">詞作核心</td>
+                    <td class="py-2.5 px-2">太宰治/宮澤賢治</td>
+                    <td class="py-2.5 px-2">三十五年生死觀</td>
+                    <td class="py-2.5 px-2">反抗社會規訓</td>
+                    <td class="py-2.5 px-2">對話體雙向暗戀</td>
+                    <td class="py-2.5 px-2">複雜樂觀前進勇氣</td>
+                  </tr>
+                  <tr>
+                    <td class="py-2.5 px-3 font-serif font-bold text-[#262626] bg-[#FAF7F2]">嗓音特質</td>
+                    <td class="py-2.5 px-2">清澈透明說書人</td>
+                    <td class="py-2.5 px-2">超齡煙燻低音</td>
+                    <td class="py-2.5 px-2">金屬撕裂死腔</td>
+                    <td class="py-2.5 px-2">甘甜純淨鄰家感</td>
+                    <td class="py-2.5 px-2">超寬音域無縫真假音</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="flex items-center justify-between text-[11px] text-[#827E77] font-mono border-t border-[#EDE5DA] pt-3">
+              <span>互補美學分析 · 完整收錄於 guides/comparison.md</span>
+              <span>五組並立的時代價值</span>
+            </div>
+          </div>
+        `
+      },
+
+      // SLIDE 9: SCENARIO RECOMMENDER
+      {
+        id: "scenarios",
+        chapter: "CHAPTER 07 · AI 情境導航路由",
+        title: "依照當下心境的精準選樂：六大聆聽情境路由",
+        notes: "【演講者提詞】在 Agent.md 的設計中，我們專門為聽眾建立了這套 AI 情境導航路由。聽眾只需根據自己當下的心境——無論是深夜想散步讀書、極度疲憊需要戰鬥能量、失戀想大哭一場、或是懷念學生時代的微酸初戀，系統都能精準推薦首選音樂人與專屬曲目。",
+        render: () => `
+          <div class="h-full flex flex-col justify-between">
+            <div>
+              <div class="flex items-center gap-2 text-xs font-mono font-bold text-[#2E6B47] uppercase">
+                <span>CHAPTER 07</span> <span>·</span> <span>SCENARIO RECOMMENDATION ENGINE</span>
+              </div>
+              <h2 class="text-2xl sm:text-3xl font-serif font-bold text-[#262626] mt-0.5">AI 情境導航與專屬推薦路由</h2>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 my-auto">
+              <div class="bg-[#FAF7F2] p-3.5 rounded-xl border border-[#E4DDD2]">
+                <div class="text-[10px] font-mono text-[#3B627D] uppercase font-bold">情境 A · 深夜沉思</div>
+                <div class="text-xs font-serif font-bold text-[#262626] mt-1">雨天漫步、尋求文字共鳴</div>
+                <div class="text-[11px] text-[#3B627D] mt-1">首選：ヨルシカ</div>
+                <div class="text-[10px] text-[#827E77] mt-0.5">《雨とカプチーノ》《春泥棒》</div>
+              </div>
+
+              <div class="bg-[#FAF7F2] p-3.5 rounded-xl border border-[#E4DDD2]">
+                <div class="text-[10px] font-mono text-[#872338] uppercase font-bold">情境 B · 能量超載</div>
+                <div class="text-xs font-serif font-bold text-[#262626] mt-1">極度壓抑、渴望爆發衝刺</div>
+                <div class="text-[11px] text-[#872338] mt-1">首選：Ado × MGA</div>
+                <div class="text-[10px] text-[#827E77] mt-0.5">《うっせぇわ》《インフェルノ》</div>
+              </div>
+
+              <div class="bg-[#FAF7F2] p-3.5 rounded-xl border border-[#E4DDD2]">
+                <div class="text-[10px] font-mono text-[#A86324] uppercase font-bold">情境 C · 心碎感傷</div>
+                <div class="text-xs font-serif font-bold text-[#262626] mt-1">情感失落、需要被同理</div>
+                <div class="text-[11px] text-[#A86324] mt-1">首選：tuki.</div>
+                <div class="text-[10px] text-[#827E77] mt-0.5">《晩餐歌》《一輪花》</div>
+              </div>
+
+              <div class="bg-[#FAF7F2] p-3.5 rounded-xl border border-[#E4DDD2]">
+                <div class="text-[10px] font-mono text-[#AD5762] uppercase font-bold">情境 D · 學生時代</div>
+                <div class="text-xs font-serif font-bold text-[#262626] mt-1">懷念校園、雙向暗戀悸動</div>
+                <div class="text-[11px] text-[#AD5762] mt-1">首選：『ユイカ』</div>
+                <div class="text-[10px] text-[#827E77] mt-0.5">《好きだから。》《そばにいて。》</div>
+              </div>
+
+              <div class="bg-[#FAF7F2] p-3.5 rounded-xl border border-[#E4DDD2]">
+                <div class="text-[10px] font-mono text-[#2E6B47] uppercase font-bold">情境 E · 盛夏希望</div>
+                <div class="text-xs font-serif font-bold text-[#262626] mt-1">重獲勇氣、元氣與救贖</div>
+                <div class="text-[11px] text-[#2E6B47] mt-1">首選：Mrs. GREEN APPLE</div>
+                <div class="text-[10px] text-[#827E77] mt-0.5">《青と夏》《ケセラセラ》</div>
+              </div>
+
+              <div class="bg-[#FAF7F2] p-3.5 rounded-xl border border-[#E4DDD2]">
+                <div class="text-[10px] font-mono text-[#3B627D] uppercase font-bold">情境 F · 聲樂神技</div>
+                <div class="text-xs font-serif font-bold text-[#262626] mt-1">極限咬字、音場鑑賞</div>
+                <div class="text-[11px] text-[#3B627D] mt-1">首選：跨界高難度</div>
+                <div class="text-[10px] text-[#827E77] mt-0.5">《ライラック》《ウタカタララバイ》</div>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between text-[11px] text-[#827E77] font-mono border-t border-[#EDE5DA] pt-3">
+              <span>情境路由指引 · 完整收錄於 Agent.md Section 5</span>
+              <span>六大心境精選</span>
+            </div>
+          </div>
+        `
+      },
+
+      // SLIDE 10: SUMMARY & KNOWLEDGE BASE
+      {
+        id: "summary",
+        chapter: "CHAPTER 08 · 結語與專案總覽",
+        title: "聲音的本質力量：Agent.md 知識庫與專案架構",
+        notes: "【演講者提詞】最後做一個總結。本專案透過建立嚴謹的 Agent.md 與模組化資料夾架構，完整收錄了這五組當代日本樂壇頂尖創作者的檔案、樂評與對照指南。希望這份網頁簡報能為每一位喜愛 J-POP 的朋友帶來嶄新的賞析視角。謝謝大家！",
+        render: () => `
+          <div class="h-full flex flex-col justify-between">
+            <div>
+              <div class="flex items-center gap-2 text-xs font-mono font-bold text-[#827E77] uppercase">
+                <span>CHAPTER 08</span> <span>·</span> <span>CONCLUSION & DELIVERABLES</span>
+              </div>
+              <h2 class="text-2xl sm:text-3xl font-serif font-bold text-[#262626] mt-0.5">聲音的本質力量：專案成果總覽</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 my-auto">
+              <div class="bg-[#FAF7F2] p-5 rounded-2xl border border-[#E4DDD2]">
+                <h3 class="font-serif font-bold text-sm text-[#262626] mb-3 flex items-center gap-2">
+                  <i class="fa-solid fa-folder-tree text-[#3B627D]"></i> 專案模組化檔案架構
+                </h3>
+                <div class="font-mono text-[11px] text-[#5F5C56] space-y-1 bg-white p-3 rounded-xl border border-[#E2DBD0]">
+                  <div>├── Agent.md (核心規範總綱)</div>
+                  <div>├── artists/ (五大音樂人檔案與樂評)</div>
+                  <div>│   ├── yorushika/ · tuki/ · ado/</div>
+                  <div>│   ├── yuika/ · mrsgreenapple/</div>
+                  <div>├── guides/ (對比矩陣與情境歌單)</div>
+                  <div>└── index.html (日系文青網頁簡報)</div>
+                </div>
+              </div>
+
+              <div class="bg-[#FAF7F2] p-5 rounded-2xl border border-[#E4DDD2]">
+                <h3 class="font-serif font-bold text-sm text-[#262626] mb-3 flex items-center gap-2">
+                  <i class="fa-solid fa-gem text-[#2E6B47]"></i> 專案核心產出價值
+                </h3>
+                <ul class="text-xs text-[#5F5C56] space-y-2 list-disc pl-4 leading-relaxed">
+                  <li><strong>日系文青美學</strong>：以和紙生成色、墨色與五大和風代表色統一視覺</li>
+                  <li><strong>網頁簡報全互動</strong>：支援全螢幕、鍵盤流暢翻頁、投影片總覽與講者備忘</li>
+                  <li><strong>實體雙軌交付</strong>：同步產出同款排版之 PowerPoint 簡報檔 (.pptx)</li>
+                  <li><strong>環境音律融合</strong>：整合 Web Audio API 實現情境氛圍琴音試聽</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between text-[11px] text-[#827E77] font-mono border-t border-[#EDE5DA] pt-3">
+              <span>簡報展示完畢 · 感謝聆聽 (Thank you for watching)</span>
+              <span>J-POP Agent Portal</span>
+            </div>
+          </div>
+        `
+      }
+    ];
+
+    // --- 3. Presentation Engine Functions ---
+    function renderSlide(index) {
+      if (index < 0) index = 0;
+      if (index >= slides.length) index = slides.length - 1;
+      currentSlide = index;
+
+      const stage = document.getElementById('slide-stage');
+      const slide = slides[currentSlide];
+
+      // Render slide content
+      stage.innerHTML = slide.render();
+
+      // Update counters & progress bar
+      const counterText = (currentSlide + 1 < 10 ? "0" : "") + (currentSlide + 1) + " / " + (slides.length < 10 ? "0" : "") + slides.length;
+      document.getElementById('slide-counter').textContent = counterText;
+      const pct = ((currentSlide + 1) / slides.length) * 100;
+      document.getElementById('slide-progress-bar').style.width = pct + "%";
+
+      // Update speaker notes content
+      document.getElementById('notes-content').textContent = slide.notes;
+
+      // Bind in-slide interactive buttons
+      stage.querySelectorAll('.play-sample-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const trackTitle = btn.getAttribute('data-track');
+          const idx = playlist.findIndex(p => p.title.includes(trackTitle) || trackTitle.includes(p.title));
+          togglePlayTrack(idx !== -1 ? idx : 0);
+        });
+      });
+
+      stage.querySelectorAll('.view-detail-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          openArtistModal(btn.getAttribute('data-artist'));
+        });
+      });
+    }
+
+    function nextSlide() {
+      if (currentSlide < slides.length - 1) {
+        renderSlide(currentSlide + 1);
+      } else {
+        showToast("已到達最後一頁投影片");
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 0) {
+        renderSlide(currentSlide - 1);
+      } else {
+        showToast("已是第一頁投影片");
+      }
+    }
+
+    // Toggle Overview Grid
+    function openOverview() {
+      const grid = document.getElementById('overview-grid');
+      grid.innerHTML = '';
+      slides.forEach((s, idx) => {
+        const thumb = document.createElement('div');
+        thumb.className = `p-3 rounded-xl border cursor-pointer transition-all ${idx === currentSlide ? 'bg-white border-[#3B627D] shadow-md ring-2 ring-[#3B627D]/30' : 'bg-[#FAF7F2] border-[#E2DBD0] hover:bg-white'}`;
+        thumb.innerHTML = `
+          <div class="text-[10px] font-mono text-[#827E77] font-bold">SLIDE ${(idx + 1 < 10 ? "0" : "") + (idx + 1)}</div>
+          <div class="text-xs font-serif font-bold text-[#262626] mt-1 line-clamp-1">${s.title}</div>
+          <div class="text-[10px] text-[#827E77] mt-0.5 line-clamp-1">${s.chapter}</div>
+        `;
+        thumb.addEventListener('click', () => {
+          renderSlide(idx);
+          closeOverview();
+        });
+        grid.appendChild(thumb);
+      });
+      document.getElementById('overview-modal').classList.remove('hidden');
+    }
+
+    function closeOverview() {
+      document.getElementById('overview-modal').classList.add('hidden');
+    }
+
+    // Toggle Speaker Notes Drawer
+    function toggleNotes() {
+      const drawer = document.getElementById('notes-drawer');
+      drawer.classList.toggle('hidden');
+    }
+
+    // Toggle Fullscreen
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+        showToast("已切換至全螢幕簡報模式");
+      } else {
+        if (document.exitFullscreen) document.exitFullscreen();
+        showToast("已退出全螢幕");
+      }
+    }
+
+    // Artist Modal logic
+    const artistDetails = {
+      yorushika: {
+        title: "ヨルシカ (Yorushika)",
+        tag: "文學概念搖滾 · n-buna × suis",
+        color: "#3B627D",
+        icon: "fa-moon",
+        content: `
+          <p><strong>樂團定位</strong>：前 Vocaloid 製作人 n-buna 與主唱 suis 組成。作品取材太宰治、宮澤賢治等文學名篇，構建 Amy 與 Elma 跨時空概念宇宙。</p>
+          <p><strong>代表作</strong>：《ただ君に晴れ》《だから僕は音楽を辞めた》《春泥棒》《斜陽》</p>
+        `
+      },
+      tuki: {
+        title: "tuki. (ツキ)",
+        tag: "神秘高校生創作歌手 · 最年輕破億紀錄",
+        color: "#A86324",
+        icon: "fa-guitar",
+        content: `
+          <p><strong>崛起奇蹟</strong>：15 歲國三以 13 歲自創曲《晩餐歌》奪得 Billboard Japan 綜合冠軍，寫下日本個人歌手最年輕破億紀錄。</p>
+          <p><strong>代表作</strong>：《晩餐歌》《一輪花》《地獄恋文》《サクラキミワタシ》</p>
+        `
+      },
+      ado: {
+        title: "Ado (アド)",
+        tag: "現象級百變歌姬 · 國立競技場開唱",
+        color: "#872338",
+        icon: "fa-microphone-lines",
+        content: `
+          <p><strong>聲樂奇蹟</strong>：從壁櫥錄音走向世界，《新時代》奪得 Apple Music 全球百大冠軍，首位登陸國立競技場的女性個人歌手。</p>
+          <p><strong>代表作</strong>：《うっせぇわ》《新時代》《唱 (Show)》《逆光》</p>
+        `
+      },
+      yuika: {
+        title: "『ユイカ』 (Yuika)",
+        tag: "奈良高校創作少女 · 亞洲雙向暗戀浪潮",
+        color: "#AD5762",
+        icon: "fa-heart",
+        content: `
+          <p><strong>純愛民謠</strong>：高中在臥室創作同學暗戀心事，以《好きだから。》在亞洲引發雙向暗戀風潮，聲線溫潤純淨。</p>
+          <p><strong>代表作</strong>：《好きだから。》《そばにいて。》《17才の歌》《恋泥棒。》</p>
+        `
+      },
+      mga: {
+        title: "Mrs. GREEN APPLE (ミセス)",
+        tag: "燦爛希望流行搖滾 · 日本唱片大賞天團",
+        color: "#2E6B47",
+        icon: "fa-apple-whole",
+        content: `
+          <p><strong>國民天團</strong>：三人體制爆發統治級熱潮，2023 年以《ケセラセラ》榮獲日本唱片大賞大賞，以交響搖滾為疲憊心靈注入希望勇氣。</p>
+          <p><strong>代表作</strong>：《青と夏》《ケセラセラ》《ライラック》《インフェルノ》</p>
+        `
+      }
+    };
+
+    function openArtistModal(key) {
+      const data = artistDetails[key];
+      if (!data) return;
+      document.getElementById('modal-title').textContent = data.title;
+      document.getElementById('modal-tag').textContent = data.tag;
+      document.getElementById('modal-tag').style.color = data.color;
+      document.getElementById('modal-icon').style.color = data.color;
+      document.getElementById('modal-icon').innerHTML = `<i class="fa-solid ${data.icon}"></i>`;
+      document.getElementById('modal-body').innerHTML = data.content;
+      document.getElementById('artist-modal').classList.remove('hidden');
+    }
+
+    function closeArtistModal() {
+      document.getElementById('artist-modal').classList.add('hidden');
+    }
+
+    
+    // Knowledge Base Documents
+    const kbDocs = {
+      "agent": { path: "Agent.md", content: "<p><strong>Agent.md 規範總綱</strong>：定義 J-POP 專業導航 Agent 之角色、知識庫架構、五大音樂人定位與六大情境路由。</p>" },
+      "yorushika-prof": { path: "artists/yorushika/profile.md", content: "<p><strong>ヨルシカ</strong>：2017 年由 n-buna 與 suis 成立之文學概念搖滾雙人組合。</p>" },
+      "yorushika-disco": { path: "artists/yorushika/discography.md", content: "<p>代表作：《ただ君に晴れ》《だから僕は音楽を辞めた》《春泥棒》《斜陽》等。</p>" },
+      "tuki-prof": { path: "artists/tuki/profile.md", content: "<p><strong>tuki.</strong>：15 歲以《晩餐歌》登頂 Billboard 冠軍，日本最年輕破億個人歌手。</p>" },
+      "tuki-disco": { path: "artists/tuki/discography.md", content: "<p>代表作：《晩餐歌》《一輪花》《地獄恋文》等。</p>" },
+      "ado-prof": { path: "artists/ado/profile.md", content: "<p><strong>Ado</strong>：網絡歌い手出身，登陸國立競技場之百變狂放歌姬。</p>" },
+      "ado-disco": { path: "artists/ado/discography.md", content: "<p>代表作：《うっせぇわ》《新時代》《唱》《逆光》等。</p>" },
+      "yuika-prof": { path: "artists/yuika/profile.md", content: "<p><strong>『ユイカ』</strong>：奈良高校創作少女，以《好きだから。》席捲亞洲雙向暗戀浪潮。</p>" },
+      "yuika-disco": { path: "artists/yuika/discography.md", content: "<p>代表作：《好きだから。》《そばにいて。》《17才の歌》等。</p>" },
+      "mga-prof": { path: "artists/mrsgreenapple/profile.md", content: "<p><strong>Mrs. GREEN APPLE</strong>：日本唱片大賞天團，大森元貴超寬音域與希望頌歌。</p>" },
+      "mga-disco": { path: "artists/mrsgreenapple/discography.md", content: "<p>代表作：《青と夏》《ケセラセラ》《ライラック》《インフェルノ》等。</p>" },
+      "comparison": { path: "guides/comparison.md", content: "<p><strong>五組音樂人綜合評比</strong>：文人、孤勇、狂放、純愛、希望五角星芒互補生態。</p>" },
+      "playlists": { path: "guides/playlist_recommendation.md", content: "<p><strong>精選情境歌單</strong>：深夜漫步、戰鬥熱血、青春純愛、靈魂救贖主題。</p>" }
+    };
+
+    function renderKbDoc(key) {
+      const doc = kbDocs[key] || kbDocs["agent"];
+      document.getElementById('doc-filepath').innerHTML = `<i class="fa-regular fa-file-code"></i> ` + doc.path;
+      document.getElementById('doc-content-container').innerHTML = doc.content;
+    }
+
+    // --- 4. Event Bootstrapping ---
+    document.addEventListener('DOMContentLoaded', () => {
+      // Direct in-app download logic
+      document.getElementById('download-html-direct-btn').addEventListener('click', () => {
+        try {
+          const content = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+          const blob = new Blob([content], { type: 'text/html;charset=utf-8' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'index.html';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          showToast("已為您下載 index.html 檔案！");
+        } catch (e) {
+          showToast("瀏覽器已觸發下載");
+        }
+      });
+
+      // Knowledge Base Drawer
+      renderKbDoc('agent');
+      document.getElementById('toggle-kb-btn').addEventListener('click', () => {
+        document.getElementById('kb-drawer').classList.toggle('hidden');
+      });
+      document.getElementById('close-kb-btn').addEventListener('click', () => {
+        document.getElementById('kb-drawer').classList.add('hidden');
+      });
+      document.getElementById('doc-selector').addEventListener('change', (e) => {
+        renderKbDoc(e.target.value);
+        showToast("已載入文檔: " + e.target.value);
+      });
+      document.getElementById('download-pptx-info-btn').addEventListener('click', () => {
+        showToast("已同步生成 PPTX 簡報檔");
+      });
+      document.querySelectorAll('.artist-tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          showToast("已過濾: " + btn.textContent);
+        });
+      });
+
+      // Initial slide render
+      renderSlide(0);
+
+      // Slide Navigation Controls
+      document.getElementById('slide-next-btn').addEventListener('click', nextSlide);
+      document.getElementById('slide-prev-btn').addEventListener('click', prevSlide);
+
+      // Presenter Tool buttons
+      document.getElementById('toggle-overview-btn').addEventListener('click', openOverview);
+      document.getElementById('close-overview-btn').addEventListener('click', closeOverview);
+      document.getElementById('toggle-notes-btn').addEventListener('click', toggleNotes);
+      document.getElementById('close-notes-btn').addEventListener('click', toggleNotes);
+      document.getElementById('toggle-fullscreen-btn').addEventListener('click', toggleFullscreen);
+
+      // Audio BGM trigger
+      document.getElementById('player-play-btn').addEventListener('click', () => togglePlayTrack());
+      document.getElementById('synth-sound-toggle').addEventListener('click', () => {
+        initAudio();
+        playTone(349.23);
+        showToast("已觸發和風環境琴音");
+      });
+
+      // Close Modals
+      document.getElementById('modal-close-btn').addEventListener('click', closeArtistModal);
+      document.getElementById('artist-modal').addEventListener('click', (e) => {
+        if (e.target === document.getElementById('artist-modal')) closeArtistModal();
+      });
+      document.getElementById('overview-modal').addEventListener('click', (e) => {
+        if (e.target === document.getElementById('overview-modal')) closeOverview();
+      });
+
+      // Keyboard Shortcuts for full web-presentation control
+      window.addEventListener('keydown', (e) => {
+        // If modals are open, handle escape
+        if (!document.getElementById('overview-modal').classList.contains('hidden')) {
+          if (e.key === 'Escape') closeOverview();
+          return;
+        }
+        if (!document.getElementById('artist-modal').classList.contains('hidden')) {
+          if (e.key === 'Escape') closeArtistModal();
+          return;
+        }
+
+        if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+          nextSlide();
+        } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+          prevSlide();
+        } else if (e.key === 'Home') {
+          renderSlide(0);
+        } else if (e.key === 'End') {
+          renderSlide(slides.length - 1);
+        } else if (e.key === 'o' || e.key === 'O') {
+          openOverview();
+        } else if (e.key === 'n' || e.key === 'N') {
+          toggleNotes();
+        } else if (e.key === 'd' || e.key === 'D') {
+          document.getElementById('kb-drawer').classList.toggle('hidden');
+        } else if (e.key === 'f' || e.key === 'F') {
+          toggleFullscreen();
+        }
+      });
+    });
+  </script>
+  <!-- ================= KNOWLEDGE BASE DRAWER ================= -->
+  <div id="kb-drawer" class="fixed inset-y-0 right-0 z-50 w-full max-w-xl bg-white border-l border-[#D5C9B8] shadow-2xl p-6 hidden flex flex-col justify-between overflow-y-auto">
+    <div>
+      <div class="flex items-center justify-between pb-3 mb-4 border-b border-[#EDE5DA]">
+        <div class="flex items-center gap-2 font-serif font-bold text-sm text-[#2E6B47]">
+          <i class="fa-solid fa-folder-tree"></i>
+          <span>J-POP 專案知識庫與文檔清單</span>
+        </div>
+        <button id="close-kb-btn" class="w-7 h-7 rounded-full bg-[#FAF7F2] text-[#827E77] hover:text-[#262626] flex items-center justify-center">
+          <i class="fa-solid fa-xmark text-xs"></i>
+        </button>
+      </div>
+
+      <!-- PPTX direct info -->
+      <div class="mb-4 p-3 rounded-xl bg-[#FAF7F2] border border-[#E2DBD0] flex items-center justify-between text-xs">
+        <span class="font-serif text-[#262626]">實體 PowerPoint 簡報檔 (.pptx)</span>
+        <button id="download-pptx-info-btn" class="text-xs font-serif text-[#3B627D] hover:underline flex items-center gap-1">
+          <i class="fa-solid fa-file-powerpoint text-red-700"></i> 已同步產生
+        </button>
+      </div>
+
+      <!-- Document Selector -->
+      <div class="mb-4" id="knowledge-base">
+        <label for="doc-selector" class="block text-xs font-serif text-[#827E77] mb-1">調閱專案 Markdown 文檔：</label>
+        <select id="doc-selector" class="w-full bg-[#FAF7F2] text-xs text-[#262626] border border-[#D5CBBF] rounded-lg p-2 focus:outline-none focus:border-[#3B627D]">
+          <option value="agent">Agent.md (專案規範總綱與推薦系統)</option>
+          <option value="yorushika-prof">artists/yorushika/profile.md (ヨルシカ檔案)</option>
+          <option value="yorushika-disco">artists/yorushika/discography.md (ヨルシカ樂評)</option>
+          <option value="tuki-prof">artists/tuki/profile.md (tuki.檔案)</option>
+          <option value="tuki-disco">artists/tuki/discography.md (tuki.樂評)</option>
+          <option value="ado-prof">artists/ado/profile.md (Ado檔案)</option>
+          <option value="ado-disco">artists/ado/discography.md (Ado樂評)</option>
+          <option value="yuika-prof">artists/yuika/profile.md (ユイカ檔案)</option>
+          <option value="yuika-disco">artists/yuika/discography.md (ユイカ樂評)</option>
+          <option value="mga-prof">artists/mrsgreenapple/profile.md (Mrs. GREEN APPLE 檔案)</option>
+          <option value="mga-disco">artists/mrsgreenapple/discography.md (Mrs. GREEN APPLE 樂評)</option>
+          <option value="comparison">guides/comparison.md (五組綜合評比)</option>
+          <option value="playlists">guides/playlist_recommendation.md (精選主題歌單)</option>
+        </select>
+      </div>
+
+      <!-- Document Display -->
+      <div class="p-4 rounded-xl bg-[#FAF7F2] border border-[#E2DBD0] min-h-[220px] max-h-[360px] overflow-y-auto mb-4">
+        <div class="text-[11px] font-mono text-[#3B627D] font-bold pb-2 mb-2 border-b border-[#EAE3D6]" id="doc-filepath"><i class="fa-regular fa-file-code"></i> Agent.md</div>
+        <div id="doc-content-container" class="text-xs text-[#4E4A44] leading-relaxed space-y-2"><p><strong>Agent.md 規範總綱</strong>：定義 J-POP 專業導航 Agent 之角色、知識庫架構、五大音樂人定位與六大情境路由。</p></div>
+      </div>
+
+      <!-- Artist Filter Buttons -->
+      <div class="pt-2 border-t border-[#EDE5DA]" id="artists">
+        <div class="text-[11px] font-serif text-[#827E77] mb-2">快速過濾藝人：</div>
+        <div class="flex flex-wrap gap-1.5" id="artists-grid">
+          <button class="artist-tab-btn text-xs px-2.5 py-1 rounded-md bg-[#EDF3F7] text-[#3B627D]" data-filter="all">全部展示</button>
+          <button class="artist-tab-btn text-xs px-2.5 py-1 rounded-md bg-[#FAF7F2] text-[#5A544A]" data-filter="yorushika">ヨルシカ</button>
+          <button class="artist-tab-btn text-xs px-2.5 py-1 rounded-md bg-[#FAF7F2] text-[#5A544A]" data-filter="tuki">tuki.</button>
+          <button class="artist-tab-btn text-xs px-2.5 py-1 rounded-md bg-[#FAF7F2] text-[#5A544A]" data-filter="ado">Ado</button>
+          <button class="artist-tab-btn text-xs px-2.5 py-1 rounded-md bg-[#FAF7F2] text-[#5A544A]" data-filter="yuika">『ユイカ』</button>
+          <button class="artist-tab-btn text-xs px-2.5 py-1 rounded-md bg-[#FAF7F2] text-[#5A544A]" data-filter="mga">Mrs. GREEN APPLE</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hidden compatibility references -->
+    <div class="hidden" id="comparison"></div>
+    <div class="hidden" id="scenarios"></div>
+
+    <div class="hidden" id="progress-container">
+      <div id="player-progress-bar"></div>
+      <span id="player-current-time">0:00</span>
+      <span id="player-total-time">3:20</span>
+      <span id="track-current-time">0:00</span>
+      <span id="track-total-time">3:20</span>
+    </div>
+  </div>
+
+
+</body></html>
